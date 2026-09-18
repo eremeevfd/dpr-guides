@@ -51,8 +51,7 @@
     // users.roblox.com has no CORS headers, so requests are routed
     // through a public CORS proxy. Tried in order; first success wins.
     var CORS_PROXIES = [
-      function (url) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(url); },
-      function (url) { return "https://corsproxy.io/?url=" + encodeURIComponent(url); }
+      function (url) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(url); }
     ];
 
     function showError(message) {
@@ -108,7 +107,7 @@
 
     lookupBtn.addEventListener("click", lookupUser);
     userIdInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") lookupUser();
+      if (e.key === "Enter" && !lookupBtn.disabled) lookupUser();
     });
 
     copyBtn.addEventListener("click", function () {
