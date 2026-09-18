@@ -43,6 +43,8 @@
     <a href="#relic-stats">Best Relic Stats</a>
     <a href="#relic-upgrades">Relic Upgrades</a>
     <a href="#challenge-hp">Challenge HP Reduction</a>
+    <p class="sidebar-label">Tools</p>
+    <a href="#roblox-username-lookup">Roblox Username Lookup</a>
     <p class="sidebar-note">Click any image to zoom.<br>Guide screenshots by <a href="https://www.roblox.com/users/23063227/profile" target="_blank" rel="noopener"><strong>iPuffyy</strong></a> (Roblox).</p>
   </nav>
 
@@ -206,6 +208,26 @@
       <figure>
         <img src="assets/challenge-hp.png" alt="Challenge HP Reduction stat analysis and priority" loading="lazy">
       </figure>
+    </section>
+
+    <section id="tools" class="card">
+      <h2>Tools</h2>
+      <p>Small utilities for the community.</p>
+
+      <div class="tool" id="roblox-username-lookup">
+        <h3>Roblox Username Lookup</h3>
+        <p>Enter a Roblox user ID to fetch their current username.</p>
+        <div class="tool-row">
+          <input type="text" id="robloxUserId" class="tool-input" placeholder="e.g. 8290364919" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+          <button type="button" id="robloxLookupBtn" class="tool-btn">Lookup</button>
+        </div>
+        <div id="robloxResult" class="tool-result" hidden>
+          <span class="tool-result-label">Username:</span>
+          <span id="robloxUsername" class="tool-result-value"></span>
+          <button type="button" id="robloxCopyBtn" class="tool-copy-btn">Copy</button>
+        </div>
+        <p id="robloxError" class="tool-error" hidden></p>
+      </div>
     </section>
 
   </main>
