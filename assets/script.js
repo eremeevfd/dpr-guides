@@ -49,8 +49,11 @@
 
   if (lookupBtn) {
     // users.roblox.com has no CORS headers, so requests are routed
-    // through a public CORS proxy. Tried in order; first success wins.
+    // through a CORS proxy. Tried in order; first success wins. The
+    // self-hosted worker (see cors-proxy-worker/) is dedicated to this
+    // site; allorigins.win is a public fallback if it's ever down.
     var CORS_PROXIES = [
+      function (url) { return "https://dpr-guides-cors-proxy.cors-proxy-worker.workers.dev/?url=" + encodeURIComponent(url); },
       function (url) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(url); }
     ];
 
