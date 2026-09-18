@@ -147,6 +147,8 @@ a { color: var(--accent); }
   display: flex;
   flex-direction: column;
   gap: 2px;
+  max-height: calc(100vh - 84px - 20px);
+  overflow-y: auto;
 }
 
 .sidebar-label {
