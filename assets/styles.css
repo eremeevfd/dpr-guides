@@ -248,7 +248,16 @@ a { color: var(--accent); }
 
 /* Tools */
 
-.tool { margin-top: 4px; }
+.tool {
+  margin-top: 4px;
+  scroll-margin-top: 84px;
+}
+
+.tool + .tool {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
 
 .tool h3 {
   margin: 0 0 6px;
@@ -259,6 +268,71 @@ a { color: var(--accent); }
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tool-group {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.tool-group .tool-row {
+  margin-bottom: 0;
+}
+
+.tool-group-label {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.tool-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.tool-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.tool-field-small {
+  flex: 0 0 140px;
+}
+
+.tool-field-auto {
+  flex: 0 0 auto;
+  justify-content: center;
+}
+
+.tool-field-auto .tool-check-row {
+  height: 39px;
+}
+
+.tool-field .tool-input {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+.tool-field-label {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 480px) {
+  .tool-grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .tool-input {
@@ -271,6 +345,59 @@ a { color: var(--accent); }
   padding: 10px 12px;
   font-size: 0.94rem;
   font-family: inherit;
+}
+
+.tool-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+select.tool-input {
+  cursor: pointer;
+}
+
+.tool-check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.tool-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 0.88rem;
+}
+
+.tool-table th,
+.tool-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tool-table th:first-child,
+.tool-table td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+
+.tool-table thead th {
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tool-note {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-dim);
 }
 
 .tool-input:focus {
