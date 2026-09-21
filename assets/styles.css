@@ -347,10 +347,6 @@ a { color: var(--accent); }
   font-family: inherit;
 }
 
-.tool-input-small {
-  flex: 0 0 70px;
-}
-
 .tool-input:disabled {
   opacity: 0.4;
   cursor: not-allowed;
