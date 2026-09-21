@@ -373,6 +373,7 @@
   var shadowGuildPerk = document.getElementById("shadowGuildPerk");
   var shadowDeepening = document.getElementById("shadowDeepening");
   var shadowDeathCoin = document.getElementById("shadowDeathCoin");
+  var shadow2kHours = document.getElementById("shadow2kHours");
   var shadowPillar = document.getElementById("shadowPillar");
   var shadowPillarMult = document.getElementById("shadowPillarMult");
   var shadowSwordTableBody = document.querySelector("#shadowSwordTable tbody");
@@ -398,8 +399,9 @@
       var guildPerk = clamp(parseFloat(shadowGuildPerk.value) || 0, 0, 15);
       var deepening = clamp(parseFloat(shadowDeepening.value) || 0, 0, 2);
       var deathCoinMult = shadowDeathCoin.checked ? 2 : 1;
+      var titleMult = shadow2kHours.checked ? 2 : 1;
       var pillarMult = shadowPillar.checked ? (parseFloat(shadowPillarMult.value) || 1) : 1;
-      var perkMult = (1 + guildPerk * 0.1) * deathCoinMult * pillarMult;
+      var perkMult = (1 + guildPerk * 0.1) * deathCoinMult * titleMult * pillarMult;
 
       shadowSwordTableBody.innerHTML = "";
       var noDropProduct = 1;
@@ -425,7 +427,7 @@
       shadowSwordExpected.textContent = expectedSum.toFixed(2);
     }
 
-    [shadowGuildPerk, shadowDeepening, shadowDeathCoin, shadowPillar, shadowPillarMult].forEach(function (el) {
+    [shadowGuildPerk, shadowDeepening, shadowDeathCoin, shadow2kHours, shadowPillar, shadowPillarMult].forEach(function (el) {
       el.addEventListener("input", renderShadowSword);
       el.addEventListener("change", renderShadowSword);
     });
