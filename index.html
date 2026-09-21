@@ -45,7 +45,10 @@
     <a href="#relic-upgrades">Relic Upgrades</a>
     <a href="#challenge-hp">Challenge HP Reduction</a>
     <p class="sidebar-label">Tools</p>
-    <a href="#tools">Roblox Username Lookup</a>
+    <a href="#roblox-username-lookup">Roblox Username Lookup</a>
+    <a href="#relic-odds-calc">Relic Drop Odds</a>
+    <a href="#relic-stat-calc">Relic Stat Roll Odds</a>
+    <a href="#shadow-sword-calc">Shadow Sword Odds</a>
     <p class="sidebar-note">Click any image to zoom.<br>Guide screenshots by <a href="https://www.roblox.com/users/23063227/profile" target="_blank" rel="noopener"><strong>iPuffyy</strong></a> (Roblox).</p>
   </nav>
 
@@ -229,6 +232,119 @@
           <button type="button" id="robloxCopyBtn" class="tool-copy-btn">Copy</button>
         </div>
         <p id="robloxError" class="tool-error" hidden></p>
+      </div>
+
+      <div class="tool" id="relic-odds-calc">
+        <h3>Relic Drop Odds by Level</h3>
+        <p>Pick your relic level to see the drop chance of each rarity per kill, per run, and per 20 runs.</p>
+        <div class="tool-row">
+          <select id="relicOddsLevel" class="tool-input">
+            <option value="1">Level 1</option>
+            <option value="2">Level 2</option>
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+            <option value="5">Level 5</option>
+            <option value="6">Level 6</option>
+            <option value="7">Level 7</option>
+            <option value="8">Level 8</option>
+            <option value="9">Level 9</option>
+            <option value="10">Level 10</option>
+          </select>
+        </div>
+        <table class="tool-table" id="relicOddsTable">
+          <thead><tr><th>Rarity</th><th>Per Kill</th><th>Per Run</th><th>Per 20 Runs</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="tool" id="relic-stat-calc">
+        <h3>Relic Stat Roll Odds</h3>
+        <p>Pick a relic slot, rarity, and Main Stat, then up to 4 desired Sub-Stats. Slots the rarity can never roll are greyed out. The one slot beyond the rarity's more-common sub-stat count is a 3-way choice: "No Extra Sub-Stat" (forces the lower, more common count), "Any" (forces the rarer higher count, but that slot can be anything), or a specific Sub-Stat (forces the higher count with that stat required).</p>
+        <div class="tool-row">
+          <select id="relicStatSlot" class="tool-input">
+            <option value="mask">Mask</option>
+            <option value="lantern">Lantern</option>
+            <option value="chain">Chain</option>
+            <option value="codex" selected>Codex</option>
+            <option value="core">Core</option>
+          </select>
+          <select id="relicStatRarity" class="tool-input">
+            <option value="Rare">Rare</option>
+            <option value="Epic">Epic</option>
+            <option value="Legendary">Legendary</option>
+            <option value="Mythic">Mythic</option>
+            <option value="Artifact" selected>Artifact</option>
+          </select>
+        </div>
+        <div class="tool-group">
+          <p class="tool-group-label">Main Stat</p>
+          <div class="tool-row">
+            <select id="relicStatMain" class="tool-input"></select>
+          </div>
+        </div>
+        <div class="tool-group">
+          <p class="tool-group-label">Sub-Stats</p>
+          <div class="tool-row tool-grid-2" id="relicStatSubRow">
+            <select id="relicStatSub1" class="tool-input"></select>
+            <select id="relicStatSub2" class="tool-input"></select>
+            <select id="relicStatSub3" class="tool-input"></select>
+            <select id="relicStatSub4" class="tool-input"></select>
+          </div>
+        </div>
+        <table class="tool-table" id="relicStatTable">
+          <tbody></tbody>
+        </table>
+        <div class="tool-result" id="relicStatResult">
+          <span class="tool-result-label">Total chance:</span>
+          <span class="tool-result-value" id="relicStatTotal"></span>
+        </div>
+        <p class="tool-note" id="relicStatNote">Sub-Stat slot availability and odds come from the rarity's "Initial Sub-Stat Count" chances. Sub-Stat Chances are assumed identical across all 5 slots (confirmed for Lantern and Codex; not independently verified for Mask/Chain/Core).</p>
+      </div>
+
+      <div class="tool" id="shadow-sword-calc">
+        <h3>Shadow Sword Drop Odds</h3>
+        <p>Chance of a Shadow Sword dropping per Shadow Realm floor and across a full 6-floor run.</p>
+        <div class="tool-group">
+          <p class="tool-group-label">Shadow Realm Upgrades</p>
+          <div class="tool-row">
+            <div class="tool-field tool-field-small">
+              <label for="shadowGuildPerk" class="tool-field-label">Guild Perk Level</label>
+              <input type="number" id="shadowGuildPerk" class="tool-input" min="0" max="15" value="0">
+            </div>
+            <div class="tool-field tool-field-small">
+              <label for="shadowDeepening" class="tool-field-label">Deepening Level</label>
+              <input type="number" id="shadowDeepening" class="tool-input" min="0" max="2" value="0">
+            </div>
+          </div>
+        </div>
+        <div class="tool-group">
+          <p class="tool-group-label">Run Buffs</p>
+          <div class="tool-row">
+            <div class="tool-field tool-field-auto">
+              <span class="tool-field-label">&nbsp;</span>
+              <label class="tool-check-row"><input type="checkbox" id="shadowDeathCoin"> Death Coin active (×2)</label>
+            </div>
+            <div class="tool-field tool-field-auto">
+              <span class="tool-field-label">&nbsp;</span>
+              <label class="tool-check-row"><input type="checkbox" id="shadowPillar"> Pillar active (×2)</label>
+            </div>
+            <div class="tool-field tool-field-small">
+              <label for="shadowPillarMult" class="tool-field-label">Pillar Multiplier</label>
+              <input type="number" id="shadowPillarMult" class="tool-input" value="2" disabled title="Locked to ×2 to match Death Coin's confirmed doubling. The sheet's own formula computed ×3, but that reading is unconfirmed — see the note below.">
+            </div>
+          </div>
+        </div>
+        <table class="tool-table" id="shadowSwordTable">
+          <thead><tr><th>Floor</th><th>Chance / Enemy</th><th>Enemies</th><th>Floor Chance</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="tool-result" id="shadowSwordResult">
+          <span class="tool-result-label">Chance for ≥1 per run:</span>
+          <span class="tool-result-value" id="shadowSwordOverall"></span>
+          <span class="tool-result-label">Expected per run:</span>
+          <span class="tool-result-value" id="shadowSwordExpected"></span>
+        </div>
+        <p class="tool-note">Pillar is locked to ×2, matching Death Coin's confirmed doubling and this game's "+200%" convention. The source spreadsheet's own formula actually computed ×3 for Pillar — that reading is unconfirmed, so we're going with the safer, tooltip-consistent ×2 instead. Let us know if you find in-game proof either way.</p>
       </div>
     </section>
 
