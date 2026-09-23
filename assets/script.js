@@ -398,10 +398,12 @@
     function renderShadowSword() {
       var guildPerk = clamp(parseFloat(shadowGuildPerk.value) || 0, 0, 15);
       var deepening = clamp(parseFloat(shadowDeepening.value) || 0, 0, 2);
-      var deathCoinMult = shadowDeathCoin.checked ? 2 : 1;
-      var titleMult = shadow2kHours.checked ? 2 : 1;
+      var deathCoinBonus = shadowDeathCoin.checked ? 1 : 0;
+      var titleBonus = shadow2kHours.checked ? 1 : 0;
       var pillarMult = shadowPillar.checked ? (parseFloat(shadowPillarMult.value) || 1) : 1;
-      var perkMult = (1 + guildPerk * 0.1) * deathCoinMult * titleMult * pillarMult;
+      // Guild Perk, Death Coin and 2K Hours "+X%" bonuses add together; Pillar multiplies the sum.
+      // Matches in-game odds: Guild Lv10 + Death Coin + Pillar = (1 + 1.0 + 1) * 3 = x9 base.
+      var perkMult = (1 + guildPerk * 0.1 + deathCoinBonus + titleBonus) * pillarMult;
 
       shadowSwordTableBody.innerHTML = "";
       var noDropProduct = 1;
