@@ -463,7 +463,7 @@
     };
     // random chest rarity weights per difficulty; puzzle adds one guaranteed chest of `puzzle` rarity
     var LABYRINTH_DIFFICULTIES = {
-      easy: { rarities: { Uncommon: 55, Rare: 25, Epic: 14, Legendary: 5 }, puzzle: "Epic", puzzleAssumed: true },
+      easy: { rarities: { Uncommon: 55, Rare: 25, Epic: 14, Legendary: 5 }, puzzle: "Epic" },
       medium: { rarities: { Rare: 30, Epic: 15, Legendary: 8, Mythic: 1 }, puzzle: "Legendary" },
       hard: { rarities: { Epic: 5, Legendary: 2, Mythic: 1 }, puzzle: "Mythic" }
     };
@@ -531,8 +531,7 @@
 
       labyrinthNote.textContent =
         "Levels 1/2/3 give 2/3/5 random chests. Solving the puzzle adds one guaranteed chest: " +
-        "Legendary on Medium, Mythic on Hard" +
-        (difficulty.puzzleAssumed ? " (Easy's puzzle chest is assumed to be Epic, not yet confirmed)." : ".");
+        "Epic on Easy, Legendary on Medium, Mythic on Hard.";
     }
 
     [labyrinthDifficulty, labyrinthLevel, labyrinthRuns, labyrinthPuzzle].forEach(function (el) {
