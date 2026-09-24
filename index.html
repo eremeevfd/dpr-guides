@@ -49,6 +49,7 @@
     <a href="#relic-odds-calc">Relic Drop Odds</a>
     <a href="#relic-stat-calc">Relic Stat Roll Odds</a>
     <a href="#shadow-sword-calc">Shadow Sword Odds</a>
+    <a href="#labyrinth-calc">Labyrinth Rewards</a>
     <p class="sidebar-note">Click any image to zoom.<br>Guide screenshots by <a href="https://www.roblox.com/users/23063227/profile" target="_blank" rel="noopener"><strong>iPuffyy</strong></a> (Roblox).</p>
   </nav>
 
@@ -351,6 +352,46 @@
           <span class="tool-result-value" id="shadowSwordExpected"></span>
         </div>
         <p class="tool-note">Guild Perk (+10% per level), Death Coin (+100%) and the 2K Hours title (+100%) add together; Pillar (×3) then multiplies the total. Checked against in-game odds: Guild Perk 10 + Death Coin + Pillar shows 0.9% on Floor 1 = 0.1% × (1 + 100% + 100%) × 3.</p>
+      </div>
+
+      <div class="tool" id="labyrinth-calc">
+        <h3>Nightmare Labyrinth Rewards</h3>
+        <p>Expected rewards from Nightmare Labyrinth chests by difficulty and level.</p>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
+            <label for="labyrinthDifficulty" class="tool-field-label">Difficulty</label>
+            <select id="labyrinthDifficulty" class="tool-input">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="labyrinthLevel" class="tool-field-label">Level</label>
+            <select id="labyrinthLevel" class="tool-input">
+              <option value="1">Level 1</option>
+              <option value="2">Level 2</option>
+              <option value="3">Level 3</option>
+            </select>
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="labyrinthRuns" class="tool-field-label">Runs</label>
+            <input type="number" id="labyrinthRuns" class="tool-input" min="1" value="10">
+          </div>
+          <div class="tool-field tool-field-auto">
+            <span class="tool-field-label">&nbsp;</span>
+            <label class="tool-check-row"><input type="checkbox" id="labyrinthPuzzle"> Puzzle solved</label>
+          </div>
+        </div>
+        <table class="tool-table" id="labyrinthRarityTable">
+          <thead><tr><th>Chest Rarity</th><th>Chance</th><th>Chests / Run</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <table class="tool-table" id="labyrinthRewardTable">
+          <thead><tr><th>Reward</th><th>Per Run</th><th id="labyrinthRunsHeader">Per 10 Runs</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="tool-note" id="labyrinthNote">Levels 1/2/3 give 2/3/5 random chests. Solving the puzzle adds one guaranteed chest: Legendary on Medium, Mythic on Hard.</p>
       </div>
     </section>
 
