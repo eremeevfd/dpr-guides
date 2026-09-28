@@ -449,7 +449,7 @@
   if (labyrinthDifficulty) {
     var LABYRINTH_REWARDS = [
       "Locks", "Weapon Stones", "Red Pot", "Rerolls", "Resets",
-      "Blue Pot", "Exp Pot", "Evo Stone", "Gold Stone", "Devil's Horn"
+      "Blue Pot", "Exp Pot", "Evo Stone", "Horn Fragment", "Gold Stone", "Devil's Horn"
     ];
     // per chest rarity: [reward, drop weight, amount] — weights reproduce the sheet's rounded %s
     var LABYRINTH_CHESTS = {
@@ -459,13 +459,16 @@
       Legendary: [["Weapon Stones", 100, 5000], ["Rerolls", 30, 20], ["Resets", 30, 20],
         ["Blue Pot", 10, 1], ["Evo Stone", 5, 1], ["Gold Stone", 2, 1]],
       Mythic: [["Locks", 100, 100], ["Rerolls", 30, 50], ["Resets", 30, 50],
-        ["Exp Pot", 10, 1], ["Gold Stone", 3, 1], ["Devil's Horn", 1, 1]]
+        ["Exp Pot", 10, 1], ["Gold Stone", 3, 1], ["Devil's Horn", 1, 1]],
+      Artifact: [["Horn Fragment", 100, 1], ["Gold Stone", 10, 1], ["Devil's Horn", 3, 1]]
     };
-    // random chest rarity weights per difficulty; puzzle adds one guaranteed chest of `puzzle` rarity
+    // random chest rarity weights per difficulty; puzzle adds one guaranteed chest of `puzzle` rarity;
+    // tickets = entry cost per run
     var LABYRINTH_DIFFICULTIES = {
-      easy: { rarities: { Uncommon: 55, Rare: 25, Epic: 14, Legendary: 5 }, puzzle: "Epic" },
-      medium: { rarities: { Rare: 30, Epic: 15, Legendary: 8, Mythic: 1 }, puzzle: "Legendary" },
-      hard: { rarities: { Epic: 5, Legendary: 2, Mythic: 1 }, puzzle: "Mythic" }
+      easy: { rarities: { Uncommon: 55, Rare: 25, Epic: 14, Legendary: 5 }, puzzle: "Epic", tickets: 1 },
+      medium: { rarities: { Rare: 30, Epic: 15, Legendary: 8, Mythic: 1 }, puzzle: "Legendary", tickets: 1 },
+      hard: { rarities: { Epic: 5, Legendary: 2, Mythic: 1 }, puzzle: "Mythic", tickets: 1 },
+      hell: { rarities: { Legendary: 10, Mythic: 4, Artifact: 1 }, puzzle: "Artifact", tickets: 3 }
     };
     var LABYRINTH_CHESTS_PER_LEVEL = { 1: 2, 2: 3, 3: 5 };
 
@@ -503,7 +506,7 @@
       }
 
       labyrinthRarityBody.innerHTML = "";
-      ["Uncommon", "Rare", "Epic", "Legendary", "Mythic"].forEach(function (rarity) {
+      ["Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Artifact"].forEach(function (rarity) {
         var weight = difficulty.rarities[rarity] || 0;
         var randomCount = randomChests * weight / rarityTotal;
         var guaranteed = puzzle && difficulty.puzzle === rarity ? 1 : 0;
@@ -529,9 +532,11 @@
         labyrinthRewardBody.appendChild(tr);
       });
 
+      var tickets = difficulty.tickets * runs;
       labyrinthNote.textContent =
-        "Levels 1/2/3 give 2/3/5 random chests. Solving the puzzle adds one guaranteed chest: " +
-        "Epic on Easy, Legendary on Medium, Mythic on Hard.";
+        "Costs " + tickets + " ticket" + (tickets === 1 ? "" : "s") + " for " + runs + " run" + (runs === 1 ? "" : "s") +
+        " (" + difficulty.tickets + " per run). Levels 1/2/3 give 2/3/5 random chests. Solving the puzzle adds one guaranteed chest: " +
+        "Epic on Easy, Legendary on Medium, Mythic on Hard, Artifact on Hell.";
     }
 
     [labyrinthDifficulty, labyrinthLevel, labyrinthRuns, labyrinthPuzzle].forEach(function (el) {
