@@ -394,6 +394,11 @@ select.tool-input {
   letter-spacing: 0.04em;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .tool-note {
   margin: 10px 0 0;
   font-size: 0.8rem;
