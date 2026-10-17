@@ -455,6 +455,33 @@ select.tool-input {
 
 .tool-copy-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+.tf-chart-head {
+  justify-content: space-between;
+  margin: 18px 0 6px;
+}
+
+.tf-chart-head .tool-group-label { margin: 0; }
+
+.tf-chart {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 4px 4px;
+}
+
+.tf-chart svg { display: block; width: 100%; height: auto; }
+
+.tool-table tr.tf-current td { color: var(--accent); font-weight: 600; }
+
+.tf-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
 .tool-error {
   margin: 14px 0 0;
   color: #ff8080;

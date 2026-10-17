@@ -52,6 +52,7 @@
     <a href="#relic-stat-calc">Relic Stat Roll Odds</a>
     <a href="#shadow-sword-calc">Shadow Sword Odds</a>
     <a href="#labyrinth-calc">Labyrinth Rewards</a>
+    <a href="#timeforged-calc">Timeforged Sword Damage</a>
     <p class="sidebar-note">Click any image to zoom.<br>Guide screenshots by <a href="https://www.roblox.com/users/23063227/profile" target="_blank" rel="noopener"><strong>iPuffyy</strong></a> (Roblox).</p>
   </nav>
 
@@ -514,6 +515,47 @@
           <tbody></tbody>
         </table>
         <p class="tool-note" id="labyrinthNote">Levels 1/2/3 give 2/3/5 random chests. Solving the puzzle adds one guaranteed chest: Epic on Easy, Legendary on Medium, Mythic on Hard, Artifact on Hell.</p>
+      </div>
+
+      <div class="tool" id="timeforged-calc">
+        <h3>Timeforged Sword Damage</h3>
+        <p>Timeforged Sword (TF) damage grows with your TF level and online hours: <strong>Damage = (TF Level &times; Online Hours)<sup>power</sup></strong>. Each evolution raises the power.</p>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
+            <label for="tfHours" class="tool-field-label">Online Hours</label>
+            <input type="number" id="tfHours" class="tool-input" min="0" value="1626">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="tfLevel" class="tool-field-label">TF Level (copies)</label>
+            <input type="number" id="tfLevel" class="tool-input" min="1" value="27">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="tfEvo" class="tool-field-label">Evolution</label>
+            <select id="tfEvo" class="tool-input">
+              <option value="2">Evo 2 (^0.5)</option>
+              <option value="3" selected>Evo 3 (^0.75)</option>
+              <option value="4">Evo 4 (^1)</option>
+              <option value="5">Evo 5 (^1.5)</option>
+              <option value="6">Evo 6 (^2.5)</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">Your damage:</span>
+          <span class="tool-result-value" id="tfDamage"></span>
+        </div>
+        <div class="table-scroll">
+          <table class="tool-table" id="tfTable">
+            <thead><tr><th>Evolution</th><th>Power</th><th>Damage</th><th>vs. Your Evo</th><th>&times;2 Hours or Level</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="tool-row tf-chart-head">
+          <p class="tool-group-label">Damage vs. online hours, all evolutions</p>
+          <label class="tool-check-row"><input type="checkbox" id="tfLog" checked> Log scale</label>
+        </div>
+        <div class="tf-chart" id="tfChart"></div>
+        <p class="tool-note">Curves use your TF level; dots mark your online hours. On log scale each gridline is &times;10, so a steeper line means faster growth. Doubling hours <em>and</em> level multiplies damage by 2<sup>2&times;power</sup> (&times;32 on Evo 6).</p>
       </div>
     </section>
 

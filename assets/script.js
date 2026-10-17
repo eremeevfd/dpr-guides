@@ -545,4 +545,174 @@
     });
     renderLabyrinth();
   }
+
+  // Timeforged Sword damage: (TF level × online hours) ^ power, power set by evolution
+  var tfHours = document.getElementById("tfHours");
+  var tfLevel = document.getElementById("tfLevel");
+  var tfEvo = document.getElementById("tfEvo");
+  var tfLog = document.getElementById("tfLog");
+  var tfDamage = document.getElementById("tfDamage");
+  var tfTableBody = document.querySelector("#tfTable tbody");
+  var tfChart = document.getElementById("tfChart");
+
+  if (tfHours) {
+    var TF_EVOS = [
+      { evo: 2, power: 0.5, color: "#97a2b4" },
+      { evo: 3, power: 0.75, color: "#81c784" },
+      { evo: 4, power: 1, color: "#ffd54f" },
+      { evo: 5, power: 1.5, color: "#ff8a65" },
+      { evo: 6, power: 2.5, color: "#4dd8ff" }
+    ];
+    var SVG_NS = "http://www.w3.org/2000/svg";
+
+    function tfDamageAt(level, hours, power) {
+      return Math.pow(level * hours, power);
+    }
+
+    function formatBig(value) {
+      var units = [[1e15, "Q"], [1e12, "T"], [1e9, "B"], [1e6, "M"], [1e3, "K"]];
+      for (var i = 0; i < units.length; i++) {
+        if (value >= units[i][0]) {
+          var scaled = value / units[i][0];
+          if (scaled >= 1000) return value.toExponential(2);
+          return parseFloat(scaled.toFixed(2)) + units[i][1];
+        }
+      }
+      return parseFloat(value.toFixed(value < 10 ? 2 : 0)).toLocaleString();
+    }
+
+    function formatRatio(value) {
+      if (value >= 1000) return "×" + formatBig(value);
+      return "×" + parseFloat(value.toPrecision(3));
+    }
+
+    function niceStep(range, target) {
+      var raw = range / target;
+      var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+      var norm = raw / mag;
+      return (norm < 1.5 ? 1 : norm < 3.5 ? 2 : norm < 7.5 ? 5 : 10) * mag;
+    }
+
+    function svgEl(name, attrs, text) {
+      var el = document.createElementNS(SVG_NS, name);
+      Object.keys(attrs).forEach(function (key) { el.setAttribute(key, attrs[key]); });
+      if (text !== undefined) el.textContent = text;
+      return el;
+    }
+
+    function renderTfChart(level, hours, currentEvo, logScale) {
+      // render at real pixel width so text stays readable on phones
+      var width = Math.max(tfChart.clientWidth - 8, 280);
+      var height = Math.round(Math.min(Math.max(width * 0.55, 240), 380));
+      var pad = { left: 52, right: 44, top: 12, bottom: 30 };
+      var plotW = width - pad.left - pad.right;
+      var plotH = height - pad.top - pad.bottom;
+      var xMax = Math.max(hours * 1.5, 100);
+      var xStep = niceStep(xMax, width < 420 ? 4 : 6);
+      xMax = Math.ceil(xMax / xStep) * xStep;
+      var yMaxValue = Math.max(tfDamageAt(level, xMax, TF_EVOS[TF_EVOS.length - 1].power), 10);
+
+      var yMin, yMax, yOf, yTicks = [];
+      if (logScale) {
+        yMin = 0;
+        yMax = Math.ceil(Math.log10(yMaxValue));
+        var decadeStep = Math.max(1, Math.ceil(yMax / (plotH < 260 ? 5 : 7)));
+        for (var d = 0; d <= yMax; d += decadeStep) yTicks.push(d);
+        yOf = function (v) { return Math.log10(Math.max(v, 1)); };
+      } else {
+        yMin = 0;
+        var yStep = niceStep(yMaxValue, 5);
+        yMax = Math.ceil(yMaxValue / yStep) * yStep;
+        for (var t = 0; t <= yMax + yStep / 2; t += yStep) yTicks.push(t);
+        yOf = function (v) { return v; };
+      }
+      function px(h) { return pad.left + h / xMax * plotW; }
+      function py(v) { return pad.top + plotH - (yOf(v) - yMin) / (yMax - yMin) * plotH; }
+      function pyRaw(y) { return pad.top + plotH - (y - yMin) / (yMax - yMin) * plotH; }
+
+      var svg = svgEl("svg", {
+        viewBox: "0 0 " + width + " " + height, width: width, height: height,
+        role: "img", "aria-label": "Timeforged Sword damage curves for evolutions 2 to 6"
+      });
+      var axisStyle = { fill: "#97a2b4", "font-size": 11, "font-family": "inherit" };
+
+      yTicks.forEach(function (tick) {
+        var y = pyRaw(tick);
+        svg.appendChild(svgEl("line", { x1: pad.left, x2: pad.left + plotW, y1: y, y2: y, stroke: "#1e2836" }));
+        var label = logScale ? formatBig(Math.pow(10, tick)) : formatBig(tick);
+        svg.appendChild(svgEl("text", Object.assign({ x: pad.left - 6, y: y + 4, "text-anchor": "end" }, axisStyle), label));
+      });
+      for (var xt = 0; xt <= xMax + xStep / 2; xt += xStep) {
+        var x = px(xt);
+        svg.appendChild(svgEl("line", { x1: x, x2: x, y1: pad.top, y2: pad.top + plotH, stroke: "#1e2836" }));
+        svg.appendChild(svgEl("text", Object.assign({ x: x, y: height - 10, "text-anchor": "middle" }, axisStyle), formatBig(xt)));
+      }
+      svg.appendChild(svgEl("line", { x1: px(hours), x2: px(hours), y1: pad.top, y2: pad.top + plotH,
+        stroke: "#e7ecf3", "stroke-opacity": 0.35, "stroke-dasharray": "4 4" }));
+
+      var samples = 120;
+      TF_EVOS.forEach(function (e) {
+        var points = [];
+        for (var i = 0; i <= samples; i++) {
+          var h = xMax * i / samples;
+          points.push(px(h).toFixed(1) + "," + py(tfDamageAt(level, h, e.power)).toFixed(1));
+        }
+        var isCurrent = e.evo === currentEvo;
+        svg.appendChild(svgEl("polyline", {
+          points: points.join(" "), fill: "none", stroke: e.color,
+          "stroke-width": isCurrent ? 3 : 1.6, "stroke-opacity": isCurrent ? 1 : 0.75,
+          "stroke-linejoin": "round"
+        }));
+        svg.appendChild(svgEl("circle", {
+          cx: px(hours), cy: py(tfDamageAt(level, hours, e.power)), r: isCurrent ? 5 : 3.5,
+          fill: e.color, stroke: "#0b0e14", "stroke-width": 1.5
+        }));
+        svg.appendChild(svgEl("text", {
+          x: pad.left + plotW + 6, y: py(tfDamageAt(level, xMax, e.power)) + 4,
+          fill: e.color, "font-size": 11, "font-weight": isCurrent ? 700 : 400, "font-family": "inherit"
+        }, "Evo " + e.evo));
+      });
+
+      tfChart.innerHTML = "";
+      tfChart.appendChild(svg);
+    }
+
+    function renderTimeforged() {
+      var hours = Math.max(parseFloat(tfHours.value) || 0, 0);
+      var level = Math.max(parseFloat(tfLevel.value) || 1, 1);
+      var currentEvo = parseInt(tfEvo.value, 10);
+      var current = TF_EVOS.filter(function (e) { return e.evo === currentEvo; })[0];
+      var currentDamage = tfDamageAt(level, hours, current.power);
+
+      tfDamage.textContent = formatBig(currentDamage) +
+        (currentDamage >= 1000 ? " (" + Math.round(currentDamage).toLocaleString() + ")" : "");
+
+      tfTableBody.innerHTML = "";
+      TF_EVOS.forEach(function (e) {
+        var damage = tfDamageAt(level, hours, e.power);
+        var tr = document.createElement("tr");
+        if (e.evo === currentEvo) tr.className = "tf-current";
+        tr.innerHTML =
+          "<td><span class=\"tf-swatch\" style=\"background:" + e.color + "\"></span>Evo " + e.evo + "</td>" +
+          "<td>^" + e.power + "</td>" +
+          "<td>" + formatBig(damage) + "</td>" +
+          "<td>" + (currentDamage > 0 ? formatRatio(damage / currentDamage) : "—") + "</td>" +
+          "<td>" + formatRatio(Math.pow(2, e.power)) + "</td>";
+        tfTableBody.appendChild(tr);
+      });
+
+      renderTfChart(level, hours, currentEvo, tfLog.checked);
+    }
+
+    [tfHours, tfLevel, tfEvo, tfLog].forEach(function (el) {
+      el.addEventListener("input", renderTimeforged);
+      el.addEventListener("change", renderTimeforged);
+    });
+    var tfResizeTimer;
+    window.addEventListener("resize", function () {
+      clearTimeout(tfResizeTimer);
+      tfResizeTimer = setTimeout(renderTimeforged, 150);
+    });
+    renderTimeforged();
+  }
 })();
