@@ -715,4 +715,79 @@
     });
     renderTimeforged();
   }
+
+  // Gold Weapon Stone: +1 level to Sword of Darkness or Timeforged Sword, whichever multiplies damage more
+  var gsDark = document.getElementById("gsDark");
+  var gsTf = document.getElementById("gsTf");
+  var gsEvo = document.getElementById("gsEvo");
+  var gsStones = document.getElementById("gsStones");
+  var gsTaiji = document.getElementById("gsTaiji");
+  var gsVerdict = document.getElementById("gsVerdict");
+  var gsTableBody = document.querySelector("#gsTable tbody");
+  var gsPlanLabel = document.getElementById("gsPlanLabel");
+  var gsPlan = document.getElementById("gsPlan");
+  var gsNote = document.getElementById("gsNote");
+
+  if (gsDark) {
+    // SoD level L → L+1 scales its own bonus by (L+2)/(L+1); with Taiji counted, Taiji's power scales by the same factor
+    function sodGain(dark, taiji) {
+      return Math.pow((dark + 2) / (dark + 1), taiji ? 2 : 1);
+    }
+
+    function tfGain(tf, power) {
+      return Math.pow((tf + 1) / tf, power);
+    }
+
+    function formatGain(gain) {
+      return "+" + ((gain - 1) * 100).toFixed(2) + "%";
+    }
+
+    function renderGoldStone() {
+      var dark = Math.max(Math.floor(parseFloat(gsDark.value) || 0), 0);
+      var tf = Math.max(Math.floor(parseFloat(gsTf.value) || 1), 1);
+      var power = parseFloat(gsEvo.value);
+      var stones = Math.min(Math.max(Math.floor(parseFloat(gsStones.value) || 1), 1), 10000);
+      var taiji = gsTaiji.checked;
+      var sod = sodGain(dark, taiji);
+      var tfg = tfGain(tf, power);
+
+      gsVerdict.textContent = sod >= tfg ? "Sword of Darkness" : "Timeforged Sword";
+      gsTableBody.innerHTML = "";
+      [["SoD Lv." + dark + " → " + (dark + 1), sod, sod >= tfg], ["TF Lv." + tf + " → " + (tf + 1), tfg, tfg > sod]].forEach(function (row) {
+        var tr = document.createElement("tr");
+        if (row[2]) tr.className = "tf-current";
+        tr.innerHTML = "<td>" + row[0] + "</td><td>" + formatGain(row[1]) + "</td>";
+        gsTableBody.appendChild(tr);
+      });
+
+      // each sword's gain per level shrinks as it levels, so spending stones one at a time on the bigger gain is optimal
+      var d = dark, t = tf, toSod = 0, total = 1;
+      for (var i = 0; i < stones; i++) {
+        var gs = sodGain(d, taiji), gt = tfGain(t, power);
+        if (gs >= gt) { d++; toSod++; total *= gs; } else { t++; total *= gt; }
+      }
+      gsPlanLabel.textContent = "Best split of " + stones + " stone" + (stones === 1 ? "" : "s") + ":";
+      gsPlan.textContent = toSod + " to SoD (Lv." + d + "), " + (stones - toSod) + " to TF (Lv." + t + "), total damage ×" +
+        parseFloat(total.toPrecision(4));
+
+      // at the current TF level, the first SoD level whose next stone is worth less than a TF level
+      var note;
+      if (sod >= tfg) {
+        var switchAt = dark;
+        while (sodGain(switchAt, taiji) >= tfg) switchAt++;
+        note = "At TF Lv." + tf + ", SoD stays the better pick up to Lv." + switchAt + ". ";
+      } else {
+        note = "TF is ahead: its next level beats SoD's. ";
+      }
+      gsNote.textContent = note + (taiji
+        ? "Counting Taiji assumes most of your damage lands while Taiji is active. Untick it to compare damage outside Taiji only."
+        : "Without Taiji, a SoD level only grows SoD's own multiplier.");
+    }
+
+    [gsDark, gsTf, gsEvo, gsStones, gsTaiji].forEach(function (el) {
+      el.addEventListener("input", renderGoldStone);
+      el.addEventListener("change", renderGoldStone);
+    });
+    renderGoldStone();
+  }
 })();
