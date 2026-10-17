@@ -600,6 +600,23 @@
     return el;
   }
 
+  // coalesce bursts of input/change events (spinner auto-repeat, typing) into one render per frame
+  function perFrame(fn) {
+    var pending = false;
+    return function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () { pending = false; fn(); });
+    };
+  }
+
+  // Chrome changes a focused number input when the wheel scrolls over it; drop focus so scrolling the page can't edit values
+  document.querySelectorAll("input[type=number]").forEach(function (input) {
+    input.addEventListener("wheel", function () {
+      if (document.activeElement === input) input.blur();
+    }, { passive: true });
+  });
+
   var CHART_GRID = "#1e2836";
   var CHART_TEXT = { fill: "#97a2b4", "font-size": 11, "font-family": "inherit" };
   var chartClipId = 0;
@@ -769,14 +786,15 @@
       renderTfChart(level, hours, currentEvo, tfLog.checked);
     }
 
+    var scheduleTimeforged = perFrame(renderTimeforged);
     [tfHours, tfLevel, tfEvo, tfLog].forEach(function (el) {
-      el.addEventListener("input", renderTimeforged);
-      el.addEventListener("change", renderTimeforged);
+      el.addEventListener("input", scheduleTimeforged);
+      el.addEventListener("change", scheduleTimeforged);
     });
     var tfResizeTimer;
     window.addEventListener("resize", function () {
       clearTimeout(tfResizeTimer);
-      tfResizeTimer = setTimeout(renderTimeforged, 150);
+      tfResizeTimer = setTimeout(scheduleTimeforged, 150);
     });
     renderTimeforged();
   }
@@ -832,11 +850,14 @@
       var path = [[d, t]];
       var payoff = { best: [[0, 1]], sod: [[0, 1]], tf: [[0, 1]] };
       var sodOnly = 1, tfOnly = 1;
+      // keep charts to a few hundred points however many stones are spent
+      var every = Math.ceil(stones / 300);
       for (var i = 0; i < stones; i++) {
         var gs = sodGain(d, taiji), gt = tfGain(t, power);
         if (gs >= gt) { d++; toSod++; total *= gs; } else { t++; total *= gt; }
         sodOnly *= sodGain(dark + i, taiji);
         tfOnly *= tfGain(tf + i, power);
+        if ((i + 1) % every && i + 1 < stones) continue;
         path.push([d, t]);
         payoff.best.push([i + 1, total]);
         payoff.sod.push([i + 1, sodOnly]);
@@ -930,11 +951,11 @@
         { key: "sod", name: "All to SoD", color: "#b39ddb", width: 1.6 },
         { key: "best", name: "Best split", color: "#4dd8ff", width: 2.8 }
       ];
-      var n = payoff.best.length - 1;
+      var n = payoff.best.length - 1; // last point index, not stone count (points are downsampled)
       var yTop = Math.max(payoff.best[n][1], payoff.sod[n][1], payoff.tf[n][1]);
       var yLog = yTop >= 100;
       var frame = chartFrame(gsPayoffChart, {
-        xMin: 0, xMax: Math.max(n, 1), yMin: 1, yMax: yTop * 1.05, yLog: yLog, padRight: 76,
+        xMin: 0, xMax: Math.max(payoff.best[n][0], 1), yMin: 1, yMax: yTop * 1.05, yLog: yLog, padRight: 76,
         xLabel: "Gold Weapon Stones spent", label: "Total damage multiplier vs Gold Weapon Stones spent",
         yFormat: function (v) { return formatRatio(v); }
       });
@@ -951,14 +972,15 @@
       });
     }
 
+    var scheduleGoldStone = perFrame(renderGoldStone);
     [gsDark, gsTf, gsEvo, gsStones, gsTaiji].forEach(function (el) {
-      el.addEventListener("input", renderGoldStone);
-      el.addEventListener("change", renderGoldStone);
+      el.addEventListener("input", scheduleGoldStone);
+      el.addEventListener("change", scheduleGoldStone);
     });
     var gsResizeTimer;
     window.addEventListener("resize", function () {
       clearTimeout(gsResizeTimer);
-      gsResizeTimer = setTimeout(renderGoldStone, 150);
+      gsResizeTimer = setTimeout(scheduleGoldStone, 150);
     });
     renderGoldStone();
   }
