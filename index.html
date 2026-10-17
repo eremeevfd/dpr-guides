@@ -53,6 +53,7 @@
     <a href="#shadow-sword-calc">Shadow Sword Odds</a>
     <a href="#labyrinth-calc">Labyrinth Rewards</a>
     <a href="#timeforged-calc">Timeforged Sword Damage</a>
+    <a href="#gold-stone-calc">Gold Weapon Stone: SoD or TF?</a>
     <p class="sidebar-note">Click any image to zoom.<br>Guide screenshots by <a href="https://www.roblox.com/users/23063227/profile" target="_blank" rel="noopener"><strong>iPuffyy</strong></a> (Roblox).</p>
   </nav>
 
@@ -556,6 +557,70 @@
         </div>
         <div class="tf-chart" id="tfChart"></div>
         <p class="tool-note">Curves use your TF level; dots mark your online hours. On log scale each gridline is &times;10, so a steeper line means faster growth. Doubling hours <em>and</em> level multiplies damage by 2<sup>2&times;power</sup> (&times;32 on Evo 6).</p>
+      </div>
+
+      <div class="tool" id="gold-stone-calc">
+        <h3>Gold Weapon Stone: SoD or TF?</h3>
+        <figure class="tool-figure">
+          <img src="assets/gold-weapon-stone.png" alt="Gold Weapon Stone item: Enhance special weapon." width="298" height="234" loading="lazy">
+        </figure>
+        <p>A Gold Weapon Stone gives +1 level to either the Sword of Darkness (SoD) or the Timeforged Sword (TF). Both are independent damage multipliers, so pick whichever one a level grows by more.</p>
+        <ul>
+          <li><strong>SoD:</strong> Independent Damage = Ascension &times; (Lv.+1) + Rebirth &times; (Lv.+1) &times; 10%. One level multiplies it by (Lv.+2)/(Lv.+1). Your Ascension and Rebirth don't change the answer.</li>
+          <li><strong>Taiji</strong> power is (Light Lv.+1) &times; (Dark Lv.+1), so a Dark level also grows Taiji by the same amount. While Taiji is active it dwarfs everything else, so a SoD level is worth that gain <em>squared</em>. Taiji duration (10/15/20s) doesn't change the pick.</li>
+          <li><strong>TF:</strong> damage is (TF Level &times; Online Hours)<sup>power</sup>, so one level multiplies it by ((Lv.+1)/Lv.)<sup>power</sup>. Online hours don't change the answer.</li>
+        </ul>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
+            <label for="gsDark" class="tool-field-label">SoD Level</label>
+            <input type="number" id="gsDark" class="tool-input" min="0" value="29">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="gsTf" class="tool-field-label">TF Level</label>
+            <input type="number" id="gsTf" class="tool-input" min="1" value="27">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="gsEvo" class="tool-field-label">TF Evolution</label>
+            <select id="gsEvo" class="tool-input">
+              <option value="0.5">Evo 2 (^0.5)</option>
+              <option value="0.75" selected>Evo 3 (^0.75)</option>
+              <option value="1">Evo 4 (^1)</option>
+              <option value="1.5">Evo 5 (^1.5)</option>
+              <option value="2.5">Evo 6 (^2.5)</option>
+            </select>
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="gsStones" class="tool-field-label">Stones to Spend</label>
+            <input type="number" id="gsStones" class="tool-input" min="1" value="10">
+          </div>
+          <div class="tool-field tool-field-auto">
+            <span class="tool-field-label">&nbsp;</span>
+            <label class="tool-check-row"><input type="checkbox" id="gsTaiji" checked> Count Taiji</label>
+          </div>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">Next stone:</span>
+          <span class="tool-result-value" id="gsVerdict"></span>
+        </div>
+        <table class="tool-table" id="gsTable">
+          <thead><tr><th>Next Level</th><th>Damage Gain</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="tool-result">
+          <span class="tool-result-label" id="gsPlanLabel"></span>
+          <span class="tool-result-value" id="gsPlan"></span>
+        </div>
+        <p class="tool-note" id="gsNote"></p>
+        <div class="tool-row tf-chart-head">
+          <p class="tool-group-label">Which sword wins at each level pair</p>
+        </div>
+        <div class="tf-chart" id="gsMapChart"></div>
+        <p class="tool-note">Above your evo's line, the next stone goes to SoD; below it, to TF. Gray lines are the other evos. The dot is you now; the stepped path is where the best split of your stones takes you (it follows the line once it reaches it).</p>
+        <div class="tool-row tf-chart-head">
+          <p class="tool-group-label">Total damage gain vs. stones spent</p>
+        </div>
+        <div class="tf-chart" id="gsPayoffChart"></div>
+        <p class="tool-note">Damage multiplier after spending stones, compared with putting every stone into one sword.</p>
       </div>
     </section>
 
