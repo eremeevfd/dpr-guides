@@ -449,7 +449,7 @@
   if (labyrinthDifficulty) {
     var LABYRINTH_REWARDS = [
       "Locks", "Weapon Stones", "Red Pot", "Rerolls", "Resets",
-      "Blue Pot", "Exp Pot", "Evo Stone", "Horn Fragment", "Gold Stone", "Devil's Horn"
+      "Blue Pot", "Exp Pot", "Evo Stone", "Horn Fragment", "Gold Weapon Stone", "Devil's Horn"
     ];
     // per chest rarity: [reward, drop weight, amount] — weights reproduce the sheet's rounded %s
     var LABYRINTH_CHESTS = {
@@ -457,10 +457,10 @@
       Rare: [["Locks", 5, 50], ["Weapon Stones", 5, 1000], ["Red Pot", 2, 1]],
       Epic: [["Weapon Stones", 10, 2000], ["Red Pot", 3, 2], ["Rerolls", 3, 10], ["Resets", 3, 10]],
       Legendary: [["Weapon Stones", 100, 5000], ["Rerolls", 30, 20], ["Resets", 30, 20],
-        ["Blue Pot", 10, 1], ["Evo Stone", 5, 1], ["Gold Stone", 2, 1]],
+        ["Blue Pot", 10, 1], ["Evo Stone", 5, 1], ["Gold Weapon Stone", 2, 1]],
       Mythic: [["Locks", 100, 100], ["Rerolls", 30, 50], ["Resets", 30, 50],
-        ["Exp Pot", 10, 1], ["Gold Stone", 3, 1], ["Devil's Horn", 1, 1]],
-      Artifact: [["Horn Fragment", 100, 1], ["Gold Stone", 10, 1], ["Devil's Horn", 3, 1]]
+        ["Exp Pot", 10, 1], ["Gold Weapon Stone", 3, 1], ["Devil's Horn", 1, 1]],
+      Artifact: [["Horn Fragment", 100, 1], ["Gold Weapon Stone", 10, 1], ["Devil's Horn", 3, 1]]
     };
     // random chest rarity weights per difficulty; puzzle adds one guaranteed chest of `puzzle` rarity;
     // tickets = entry cost per run
