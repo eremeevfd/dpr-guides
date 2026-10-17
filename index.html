@@ -566,14 +566,14 @@
         </figure>
         <p>A Gold Weapon Stone gives +1 level to either the Sword of Darkness (SoD) or the Timeforged Sword (TF). Both are independent damage multipliers, so pick whichever one a level grows by more.</p>
         <ul>
-          <li><strong>SoD:</strong> Independent Damage = Ascension &times; (Lv.+1) + Rebirth &times; (Lv.+1) &times; 10%. One level multiplies it by (Lv.+2)/(Lv.+1). Your Ascension and Rebirth don't change the answer.</li>
+          <li><strong>SoD:</strong> Independent Damage = Ascension &times; (Lv.+1) + Rebirth &times; (Lv.+1) &times; 10%. One level multiplies it by (Lv.+2)/(Lv.+1). Your Ascension and Rebirth don't change the answer. SoD maxes out at Lv.60; after that every stone goes to TF.</li>
           <li><strong>Taiji</strong> power is (Light Lv.+1) &times; (Dark Lv.+1), so a Dark level also grows Taiji by the same amount. While Taiji is active it dwarfs everything else, so a SoD level is worth that gain <em>squared</em>. Taiji duration (10/15/20s) doesn't change the pick.</li>
           <li><strong>TF:</strong> damage is (TF Level &times; Online Hours)<sup>power</sup>, so one level multiplies it by ((Lv.+1)/Lv.)<sup>power</sup>. Online hours don't change the answer.</li>
         </ul>
         <div class="tool-row">
           <div class="tool-field tool-field-small">
             <label for="gsDark" class="tool-field-label">SoD Level</label>
-            <input type="number" id="gsDark" class="tool-input" min="0" value="29">
+            <input type="number" id="gsDark" class="tool-input" min="0" max="60" value="29">
           </div>
           <div class="tool-field tool-field-small">
             <label for="gsTf" class="tool-field-label">TF Level</label>

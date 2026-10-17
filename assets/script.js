@@ -814,9 +814,16 @@
   var gsPayoffChart = document.getElementById("gsPayoffChart");
 
   if (gsDark) {
+    var SOD_MAX = 60; // in-game cap: Gold Weapon Stones can't level SoD past this
+
     // SoD level L → L+1 scales its own bonus by (L+2)/(L+1); with Taiji counted, Taiji's power scales by the same factor
     function sodGain(dark, taiji) {
       return Math.pow((dark + 2) / (dark + 1), taiji ? 2 : 1);
+    }
+
+    // a maxed SoD can't take the stone, so its gain is 0 and TF always wins
+    function sodNext(dark, taiji) {
+      return dark < SOD_MAX ? sodGain(dark, taiji) : 0;
     }
 
     function tfGain(tf, power) {
@@ -828,20 +835,22 @@
     }
 
     function renderGoldStone() {
-      var dark = Math.max(Math.floor(parseFloat(gsDark.value) || 0), 0);
+      var dark = Math.min(Math.max(Math.floor(parseFloat(gsDark.value) || 0), 0), SOD_MAX);
       var tf = Math.max(Math.floor(parseFloat(gsTf.value) || 1), 1);
       var power = parseFloat(gsEvo.value);
       var stones = Math.min(Math.max(Math.floor(parseFloat(gsStones.value) || 1), 1), 10000);
       var taiji = gsTaiji.checked;
-      var sod = sodGain(dark, taiji);
+      var sodMaxed = dark >= SOD_MAX;
+      var sod = sodNext(dark, taiji);
       var tfg = tfGain(tf, power);
 
-      gsVerdict.textContent = sod >= tfg ? "Sword of Darkness" : "Timeforged Sword";
+      gsVerdict.textContent = sod >= tfg ? "Sword of Darkness" : "Timeforged Sword" + (sodMaxed ? " (SoD is maxed)" : "");
       gsTableBody.innerHTML = "";
-      [["SoD Lv." + dark + " → " + (dark + 1), sod, sod >= tfg], ["TF Lv." + tf + " → " + (tf + 1), tfg, tfg > sod]].forEach(function (row) {
+      [[sodMaxed ? "SoD Lv." + dark + " (max)" : "SoD Lv." + dark + " → " + (dark + 1), sod, sod >= tfg],
+        ["TF Lv." + tf + " → " + (tf + 1), tfg, tfg > sod]].forEach(function (row) {
         var tr = document.createElement("tr");
         if (row[2]) tr.className = "tf-current";
-        tr.innerHTML = "<td>" + row[0] + "</td><td>" + formatGain(row[1]) + "</td>";
+        tr.innerHTML = "<td>" + row[0] + "</td><td>" + (row[1] ? formatGain(row[1]) : "—") + "</td>";
         gsTableBody.appendChild(tr);
       });
 
@@ -853,9 +862,10 @@
       // keep charts to a few hundred points however many stones are spent
       var every = Math.ceil(stones / 300);
       for (var i = 0; i < stones; i++) {
-        var gs = sodGain(d, taiji), gt = tfGain(t, power);
+        var gs = sodNext(d, taiji), gt = tfGain(t, power);
         if (gs >= gt) { d++; toSod++; total *= gs; } else { t++; total *= gt; }
-        sodOnly *= sodGain(dark + i, taiji);
+        // stones past the cap can't go to SoD, so the all-SoD line goes flat there
+        if (dark + i < SOD_MAX) sodOnly *= sodGain(dark + i, taiji);
         tfOnly *= tfGain(tf + i, power);
         if ((i + 1) % every && i + 1 < stones) continue;
         path.push([d, t]);
@@ -869,10 +879,14 @@
 
       // at the current TF level, the first SoD level whose next stone is worth less than a TF level
       var note;
-      if (sod >= tfg) {
+      if (sodMaxed) {
+        note = "SoD is at its max level (" + SOD_MAX + "), so every stone goes to TF. ";
+      } else if (sod >= tfg) {
         var switchAt = dark;
-        while (sodGain(switchAt, taiji) >= tfg) switchAt++;
-        note = "At TF Lv." + tf + ", SoD stays the better pick up to Lv." + switchAt + ". ";
+        while (switchAt < SOD_MAX && sodGain(switchAt, taiji) >= tfg) switchAt++;
+        note = switchAt === SOD_MAX
+          ? "At TF Lv." + tf + ", SoD stays the better pick all the way to its max, Lv." + SOD_MAX + ". "
+          : "At TF Lv." + tf + ", SoD stays the better pick up to Lv." + switchAt + ". ";
       } else {
         note = "TF is ahead: its next level beats SoD's. ";
       }
@@ -892,7 +906,8 @@
     function renderGsMap(dark, tf, power, taiji, path) {
       var end = path[path.length - 1];
       var switchD = (taiji ? 2 : 1) / power * (tf + 0.5) - 1.5;
-      var xMax = Math.max(dark, end[0], switchD, 20) * 1.2;
+      // nothing past the SoD cap is reachable, so the map stops there
+      var xMax = Math.min(Math.max(dark, end[0], switchD, 20) * 1.2, SOD_MAX);
       var yMax = Math.max(tf, end[1], tfBreakEven(Math.max(dark, end[0]), power, taiji), 20) * 1.2;
       var frame = chartFrame(gsMapChart, {
         xMin: 0, xMax: xMax, yMin: 0, yMax: yMax, yLog: false, padRight: 16,
@@ -934,6 +949,11 @@
         frame.svg.appendChild(svgEl("text", { x: lx, y: ly, "text-anchor": anchor, "font-size": 11, "font-family": "inherit",
           fill: e.power === power ? "#e7ecf3" : "#97a2b4", "font-weight": e.power === power ? 700 : 400 }, "Evo " + e.evo));
       });
+      if (frame.xMax >= SOD_MAX) {
+        frame.layer.appendChild(svgEl("line", { x1: frame.px(SOD_MAX), x2: frame.px(SOD_MAX), y1: frame.py(0), y2: frame.py(top),
+          stroke: "#e7ecf3", "stroke-opacity": 0.35, "stroke-dasharray": "4 4" }));
+        frame.svg.appendChild(svgEl("text", { x: frame.px(SOD_MAX) - 4, y: frame.pad.top + frame.plotH / 2, "text-anchor": "end", fill: CHART_TEXT.fill, "font-size": 11, "font-family": "inherit" }, "SoD max"));
+      }
       frame.svg.appendChild(svgEl("text", { x: frame.pad.left + 8, y: frame.pad.top + 18, fill: "#b39ddb", "font-size": 12, "font-weight": 700, "font-family": "inherit" }, "SoD better"));
       frame.svg.appendChild(svgEl("text", { x: frame.pad.left + frame.plotW - 8, y: frame.pad.top + frame.plotH - 8, "text-anchor": "end", fill: "#ffb74d", "font-size": 12, "font-weight": 700, "font-family": "inherit" }, "TF better"));
       frame.svg.appendChild(svgEl("text", { x: 12, y: frame.pad.top + frame.plotH / 2, transform: "rotate(-90 12 " + (frame.pad.top + frame.plotH / 2) + ")", "text-anchor": "middle", fill: CHART_TEXT.fill, "font-size": 11, "font-family": "inherit" }, "TF level"));
