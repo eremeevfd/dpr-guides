@@ -46,6 +46,7 @@
     <a href="#challenge-hp">Challenge HP Reduction</a>
     <a href="#endless-abyss">Endless Abyss</a>
     <a href="#soul-awakening">Soul Awakening</a>
+    <a href="#soul-spawner">Soul Spawner</a>
     <p class="sidebar-label">Tools</p>
     <a href="#roblox-username-lookup">Roblox Username Lookup</a>
     <a href="#relic-odds-calc">Relic Drop Odds</a>
@@ -54,6 +55,7 @@
     <a href="#labyrinth-calc">Labyrinth Rewards</a>
     <a href="#timeforged-calc">Timeforged Sword Damage</a>
     <a href="#gold-stone-calc">Gold Weapon Stone: SoD or TF?</a>
+    <a href="#soul-spawner-calc">Soul Spawner</a>
     <p class="sidebar-note">Click any image to zoom.<br>Guide screenshots by <a href="https://www.roblox.com/users/23063227/profile" target="_blank" rel="noopener"><strong>iPuffyy</strong></a> (Roblox).</p>
   </nav>
 
@@ -341,6 +343,34 @@
       </div>
     </section>
 
+    <section id="soul-spawner" class="card">
+      <h2>Soul Spawner <span class="tag">NEW</span></h2>
+      <ul>
+        <li>The Soul Spawner generates Souls over time. Its panel shows your rate per minute and how much is stored.</li>
+        <li>Upgrading the Soul Spawner raises its output. At max level (Lv.5) it gives +200%.</li>
+        <li>Output grows with your Ascension, roughly with Ascension cubed: going from Ascension 40 to 80 multiplies it by about &times;7.</li>
+      </ul>
+      <figure>
+        <img src="assets/soul-spawner.png" alt="Soul Spawner at Ascension 42 making +42.62M Souls per minute, next to its upgrade screen at Level 5: generates Souls over time, increased by 200%" width="900" height="566" loading="lazy">
+      </figure>
+
+      <h3>Midnight Harvester</h3>
+      <figure class="tool-figure">
+        <img src="assets/midnight-harvester.png" alt="Midnight Harvester weapon: Final Souls +100%" width="442" height="424" loading="lazy">
+      </figure>
+      <ul>
+        <li>The Midnight Harvester gives <strong>Final Souls +100%</strong>, plus 5% more per level. That doubles your Soul Spawner output from Lv.0.</li>
+      </ul>
+
+      <h3>Souls per Minute</h3>
+      <p><strong>Souls/min = 0.0001792 &times; (Ascension + 4.1211)<sup>3.0502</sup> &times; H</strong> million, with a maxed (Lv.5) Soul Spawner.</p>
+      <ul>
+        <li>H = 1 without Midnight Harvester.</li>
+        <li>H = 2 + 0.05 &times; Midnight Harvester Level with it.</li>
+      </ul>
+      <p class="tool-note">This formula is fitted from player readings, not taken from the game code. It matches nine in-game readings from Ascension 24 to 81 to within 0.01%. Try your numbers in the <a href="#soul-spawner-calc">Soul Spawner calculator</a>.</p>
+    </section>
+
     <section id="tools" class="card">
       <h2>Tools</h2>
       <p>Small utilities for the community.</p>
@@ -621,6 +651,41 @@
         </div>
         <div class="tf-chart" id="gsPayoffChart"></div>
         <p class="tool-note">Damage multiplier after spending stones, compared with putting every stone into one sword.</p>
+      </div>
+
+      <div class="tool" id="soul-spawner-calc">
+        <h3>Soul Spawner</h3>
+        <p>How many Souls a maxed (Lv.5) Soul Spawner makes at your Ascension, with and without the Midnight Harvester. Uses the fitted formula from the <a href="#soul-spawner">Soul Spawner guide</a>.</p>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
+            <label for="ssAscension" class="tool-field-label">Ascension</label>
+            <input type="number" id="ssAscension" class="tool-input" min="0" value="42">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="ssHarvesterLevel" class="tool-field-label">Harvester Level</label>
+            <input type="number" id="ssHarvesterLevel" class="tool-input" min="0" value="0">
+          </div>
+          <div class="tool-field tool-field-auto">
+            <span class="tool-field-label">&nbsp;</span>
+            <label class="tool-check-row"><input type="checkbox" id="ssHarvester" checked> Midnight Harvester</label>
+          </div>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">Souls per minute:</span>
+          <span class="tool-result-value" id="ssRate"></span>
+        </div>
+        <div class="table-scroll">
+          <table class="tool-table" id="ssTable">
+            <thead><tr><th>Time</th><th>Without Harvester</th><th id="ssWithHeader">With Harvester</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="tool-note" id="ssNote"></p>
+        <div class="tool-row tf-chart-head">
+          <p class="tool-group-label">Souls per minute vs. Ascension</p>
+        </div>
+        <div class="tf-chart" id="ssChart"></div>
+        <p class="tool-note">Dots mark your Ascension. The Midnight Harvester lifts the whole curve: &times;2 at Lv.0, +5% more per level.</p>
       </div>
     </section>
 
