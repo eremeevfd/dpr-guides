@@ -476,7 +476,8 @@ select.tool-input {
 
 .tf-chart svg { display: block; width: 100%; height: auto; }
 
-.tool-table tr.tf-current td { color: var(--accent); font-weight: 600; }
+.tool-table tr.tf-current td,
+.tool-table td.ss-mine { color: var(--accent); font-weight: 600; }
 
 .tf-swatch {
   display: inline-block;

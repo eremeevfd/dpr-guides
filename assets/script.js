@@ -1004,4 +1004,88 @@
     });
     renderGoldStone();
   }
+
+  // Soul Spawner (maxed, +200%): fitted Souls/min = 0.0001792M × (Ascension + 4.1211)^3.0502 × H, H = 2 + 0.05 × Harvester Lv. (1 without)
+  var ssAscension = document.getElementById("ssAscension");
+  var ssHarvester = document.getElementById("ssHarvester");
+  var ssHarvesterLevel = document.getElementById("ssHarvesterLevel");
+  var ssRate = document.getElementById("ssRate");
+  var ssTableBody = document.querySelector("#ssTable tbody");
+  var ssWithHeader = document.getElementById("ssWithHeader");
+  var ssNote = document.getElementById("ssNote");
+  var ssChart = document.getElementById("ssChart");
+
+  if (ssAscension) {
+    var SS_PERIODS = [["Per minute", 1], ["Per hour", 60], ["Per 8 hours", 480], ["Per day", 1440], ["Per week", 10080]];
+
+    function soulsPerMin(ascension, harvesterMult) {
+      return 0.0001792e6 * Math.pow(ascension + 4.1211, 3.0502) * harvesterMult;
+    }
+
+    function harvesterMult(level) {
+      return 2 + 0.05 * level;
+    }
+
+    function renderSoulSpawner() {
+      var ascension = Math.max(Math.floor(parseFloat(ssAscension.value) || 0), 0);
+      var level = Math.max(Math.floor(parseFloat(ssHarvesterLevel.value) || 0), 0);
+      var owned = ssHarvester.checked;
+      var withMult = harvesterMult(level);
+      var base = soulsPerMin(ascension, 1);
+      var withH = soulsPerMin(ascension, withMult);
+
+      ssHarvesterLevel.disabled = !owned;
+      ssRate.textContent = formatBig(owned ? withH : base) + (owned ? " (Harvester Lv." + level + ", ×" + parseFloat(withMult.toFixed(2)) + ")" : " (no Harvester)");
+      ssWithHeader.textContent = "With Harvester Lv." + level;
+      ssTableBody.innerHTML = "";
+      SS_PERIODS.forEach(function (p) {
+        var tr = document.createElement("tr");
+        tr.innerHTML = "<td>" + p[0] + "</td><td" + (owned ? "" : " class=\"ss-mine\"") + ">" + formatBig(base * p[1]) +
+          "</td><td" + (owned ? " class=\"ss-mine\"" : "") + ">" + formatBig(withH * p[1]) + "</td>";
+        ssTableBody.appendChild(tr);
+      });
+
+      var nextAsc = soulsPerMin(ascension + 1, 1) / base - 1;
+      ssNote.textContent = "Next Ascension: +" + (nextAsc * 100).toFixed(1) + "% Souls. " + (owned
+        ? "Next Harvester level: +" + (0.05 / withMult * 100).toFixed(2) + "% Souls."
+        : "Getting the Midnight Harvester doubles your Souls (×2 at Lv.0).");
+
+      renderSsChart(ascension, level, owned);
+    }
+
+    function renderSsChart(ascension, level, owned) {
+      var xMax = Math.max(100, Math.ceil(ascension * 1.2));
+      var series = [
+        { name: "No Harvester", mult: 1, color: "#97a2b4", mine: !owned },
+        { name: "Harvester Lv." + level, mult: harvesterMult(level), color: "#4dd8ff", mine: owned }
+      ];
+      var frame = chartFrame(ssChart, {
+        xMin: 0, xMax: xMax, yMin: 0, yMax: soulsPerMin(xMax, series[1].mult), yLog: false, padRight: 96,
+        xLabel: "Ascension", label: "Soul Spawner Souls per minute vs Ascension, with and without Midnight Harvester",
+        yFormat: formatBig
+      });
+      series.forEach(function (sr) {
+        var pts = [];
+        for (var a = 0; a <= frame.xMax; a += frame.xMax / 120) pts.push([a, soulsPerMin(a, sr.mult)]);
+        frame.layer.appendChild(svgEl("polyline", { points: pointsAttr(frame, pts), fill: "none", stroke: sr.color, "stroke-width": sr.mine ? 2.6 : 1.6, "stroke-linejoin": "round" }));
+        frame.layer.appendChild(svgEl("circle", { cx: frame.px(ascension), cy: frame.py(soulsPerMin(ascension, sr.mult)), r: sr.mine ? 5 : 3.5,
+          fill: sr.color, stroke: "#0b0e14", "stroke-width": 1.5 }));
+        frame.svg.appendChild(svgEl("text", { x: frame.px(frame.xMax) + 6, y: Math.max(frame.py(soulsPerMin(frame.xMax, sr.mult)) + 4, frame.pad.top + 10),
+          fill: sr.color, "font-size": 11, "font-family": "inherit", "font-weight": sr.mine ? 700 : 400 }, sr.name));
+      });
+      frame.svg.appendChild(svgEl("text", { x: 12, y: frame.pad.top + frame.plotH / 2, transform: "rotate(-90 12 " + (frame.pad.top + frame.plotH / 2) + ")", "text-anchor": "middle", fill: CHART_TEXT.fill, "font-size": 11, "font-family": "inherit" }, "Souls / min"));
+    }
+
+    var scheduleSoulSpawner = perFrame(renderSoulSpawner);
+    [ssAscension, ssHarvester, ssHarvesterLevel].forEach(function (el) {
+      el.addEventListener("input", scheduleSoulSpawner);
+      el.addEventListener("change", scheduleSoulSpawner);
+    });
+    var ssResizeTimer;
+    window.addEventListener("resize", function () {
+      clearTimeout(ssResizeTimer);
+      ssResizeTimer = setTimeout(scheduleSoulSpawner, 150);
+    });
+    renderSoulSpawner();
+  }
 })();
