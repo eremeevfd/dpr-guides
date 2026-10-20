@@ -196,7 +196,7 @@ a { color: var(--accent); }
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 22px 24px;
-  scroll-margin-top: 84px;
+  scroll-margin-top: calc(var(--header-h, 76px) + 8px);
 }
 
 .card h2 {
@@ -252,7 +252,7 @@ a { color: var(--accent); }
 
 .tool {
   margin-top: 4px;
-  scroll-margin-top: 84px;
+  scroll-margin-top: calc(var(--header-h, 76px) + 8px);
 }
 
 .tool + .tool {
@@ -583,14 +583,21 @@ select.tool-input {
     padding-top: 18px;
   }
 
+  /* Drop-down under the sticky header, so it opens in view wherever you've scrolled */
   .sidebar {
-    position: static;
+    position: fixed;
+    top: calc(var(--header-h, 80px) + 8px);
+    left: 16px;
+    right: 16px;
+    z-index: 19;
+    max-height: calc(100vh - var(--header-h, 80px) - 24px);
+    max-height: calc(100dvh - var(--header-h, 80px) - 24px);
     display: none;
     background: var(--bg-raised);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 14px;
-    margin-bottom: 4px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   }
 
   .sidebar.open { display: flex; }

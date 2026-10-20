@@ -7,11 +7,25 @@
     navToggle.setAttribute("aria-expanded", String(isOpen));
   });
 
+  function closeNav() {
+    sidebar.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+  }
+
   sidebar.querySelectorAll("a").forEach(function (link) {
-    link.addEventListener("click", function () {
-      sidebar.classList.remove("open");
-      navToggle.setAttribute("aria-expanded", "false");
-    });
+    link.addEventListener("click", closeNav);
+  });
+
+  // The mobile menu is fixed under the sticky header, whose height changes as it wraps
+  var siteHeader = document.querySelector(".site-header");
+  new ResizeObserver(function () {
+    document.documentElement.style.setProperty("--header-h", siteHeader.offsetHeight + "px");
+  }).observe(siteHeader);
+
+  document.addEventListener("click", function (e) {
+    if (sidebar.classList.contains("open") && !sidebar.contains(e.target) && !navToggle.contains(e.target)) {
+      closeNav();
+    }
   });
 
   var lightbox = document.getElementById("lightbox");
@@ -36,7 +50,10 @@
     if (e.target === lightbox) closeLightbox();
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeLightbox();
+    if (e.key === "Escape") {
+      closeLightbox();
+      closeNav();
+    }
   });
 
   // Wide tables: fade the edges that hide columns and add a hint under the table
