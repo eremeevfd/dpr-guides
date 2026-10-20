@@ -39,6 +39,28 @@
     if (e.key === "Escape") closeLightbox();
   });
 
+  // Wide tables: fade the edges that hide columns and add a hint under the table
+  document.querySelectorAll(".table-scroll").forEach(function (box) {
+    var hint = document.createElement("p");
+    hint.className = "scroll-hint";
+    hint.textContent = "Swipe or scroll sideways to see more →";
+    box.after(hint);
+
+    var update = perFrame(function () {
+      var max = box.scrollWidth - box.clientWidth;
+      var scrollable = max > 1;
+      box.classList.toggle("fade-left", scrollable && box.scrollLeft > 1);
+      box.classList.toggle("fade-right", scrollable && box.scrollLeft < max - 1);
+      hint.hidden = !scrollable;
+    });
+
+    box.addEventListener("scroll", update, { passive: true });
+    new ResizeObserver(update).observe(box);
+    var table = box.querySelector("table");
+    if (table) new ResizeObserver(update).observe(table);
+    update();
+  });
+
   // Roblox username lookup
   var userIdInput = document.getElementById("robloxUserId");
   var lookupBtn = document.getElementById("robloxLookupBtn");
