@@ -349,6 +349,10 @@ a { color: var(--accent); }
   font-family: inherit;
 }
 
+.tool-input-invalid {
+  border-color: #ff8080;
+}
+
 .tool-input:disabled {
   opacity: 0.4;
   cursor: not-allowed;

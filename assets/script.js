@@ -1127,4 +1127,102 @@
     });
     renderSoulSpawner();
   }
+
+  // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
+  // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
+  var xpLevel = document.getElementById("xpLevel");
+  var xpCurrent = document.getElementById("xpCurrent");
+  var xpTarget = document.getElementById("xpTarget");
+  var xpRate = document.getElementById("xpRate");
+  var xpRateUnit = document.getElementById("xpRateUnit");
+  var xpToTarget = document.getElementById("xpToTarget");
+  var xpTimeToTarget = document.getElementById("xpTimeToTarget");
+  var xpTableBody = document.querySelector("#xpTable tbody");
+  var xpNote = document.getElementById("xpNote");
+
+  if (xpLevel) {
+    var XP_COEF = 1.35;
+    var XP_SUFFIXES = { k: 1e3, m: 1e6, b: 1e9, t: 1e12, q: 1e15, qa: 1e15, qd: 1e15, qi: 1e18, qn: 1e18, sx: 1e21 };
+    var XP_PERIODS = [["1 hour", 3600], ["8 hours", 28800], ["1 day", 86400], ["1 week", 604800], ["30 days", 2592000]];
+
+    function xpForNext(level) {
+      return XP_COEF * level * level;
+    }
+
+    function xpTotalAt(level) {
+      return XP_COEF * (level - 1) * level * (2 * level - 1) / 6;
+    }
+
+    // inverse of xpTotalAt: highest level whose total XP fits in `total`
+    function levelForTotal(total) {
+      var n = Math.max(Math.floor(Math.cbrt(total / (XP_COEF / 3))), 1);
+      while (n > 1 && xpTotalAt(n) > total) n--;
+      while (xpTotalAt(n + 1) <= total) n++;
+      return n;
+    }
+
+    // "22.30B", "1.5t", "3e15", "1,000" → number; NaN if unreadable
+    function parseXp(text) {
+      var m = String(text).trim().replace(/,/g, "").match(/^([0-9]*\.?[0-9]+(?:e[+-]?[0-9]+)?)\s*([a-z]{0,2})$/i);
+      if (!m) return NaN;
+      var unit = m[2].toLowerCase();
+      if (unit && !(unit in XP_SUFFIXES)) return NaN;
+      return parseFloat(m[1]) * (unit ? XP_SUFFIXES[unit] : 1);
+    }
+
+    function formatDuration(seconds) {
+      if (!isFinite(seconds)) return "never";
+      if (seconds < 60) return Math.ceil(seconds) + "s";
+      var parts = [[31536000, "y"], [86400, "d"], [3600, "h"], [60, "m"]];
+      var out = [];
+      var rest = Math.round(seconds / 60) * 60;
+      for (var i = 0; i < parts.length && out.length < 2; i++) {
+        var count = Math.floor(rest / parts[i][0]);
+        if (count > 0 || out.length) {
+          if (count > 0) out.push(count + parts[i][1]);
+          rest -= count * parts[i][0];
+        }
+      }
+      return out.join(" ");
+    }
+
+    function renderXpLevel() {
+      var level = Math.max(Math.floor(parseFloat(xpLevel.value) || 1), 1);
+      var target = Math.max(Math.floor(parseFloat(xpTarget.value) || 1), 1);
+      var current = parseXp(xpCurrent.value);
+      var rate = parseXp(xpRate.value);
+      xpCurrent.classList.toggle("tool-input-invalid", isNaN(current));
+      xpRate.classList.toggle("tool-input-invalid", isNaN(rate));
+      current = isNaN(current) ? 0 : Math.min(current, xpForNext(level));
+      var perSec = isNaN(rate) ? 0 : rate / parseFloat(xpRateUnit.value);
+
+      var start = xpTotalAt(level) + current;
+      var needed = Math.max(xpTotalAt(target) - start, 0);
+      xpToTarget.textContent = target <= level
+        ? "Already past Lv." + target.toLocaleString()
+        : formatBig(needed) + " (Lv." + level.toLocaleString() + " → Lv." + target.toLocaleString() + ")";
+      xpTimeToTarget.textContent = target <= level ? "—" : perSec > 0 ? formatDuration(needed / perSec) : "enter your XP rate";
+
+      xpTableBody.innerHTML = "";
+      XP_PERIODS.forEach(function (p) {
+        var earned = perSec * p[1];
+        var reached = levelForTotal(start + earned);
+        var tr = document.createElement("tr");
+        tr.innerHTML = "<td>" + p[0] + "</td><td>" + formatBig(earned) + "</td><td>Lv." + reached.toLocaleString() +
+          " (+" + (reached - level).toLocaleString() + ")</td>";
+        xpTableBody.appendChild(tr);
+      });
+
+      var next = xpForNext(level);
+      xpNote.textContent = "Lv." + level.toLocaleString() + " needs " + formatBig(next) + " XP; you have " + formatBig(next - current) + " to go" +
+        (perSec > 0 ? " (" + formatDuration((next - current) / perSec) + ")" : "") + ".";
+    }
+
+    var scheduleXpLevel = perFrame(renderXpLevel);
+    [xpLevel, xpCurrent, xpTarget, xpRate, xpRateUnit].forEach(function (el) {
+      el.addEventListener("input", scheduleXpLevel);
+      el.addEventListener("change", scheduleXpLevel);
+    });
+    renderXpLevel();
+  }
 })();

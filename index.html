@@ -58,6 +58,7 @@
     <a href="#timeforged-calc">Timeforged Sword Damage</a>
     <a href="#gold-stone-calc">Gold Weapon Stone: SoD or TF?</a>
     <a href="#soul-spawner-calc">Soul Spawner</a>
+    <a href="#xp-level-calc">Level XP</a>
     <p class="sidebar-note">Click any image to zoom.<br>Guide screenshots by <a href="https://www.roblox.com/users/23063227/profile" target="_blank" rel="noopener"><strong>iPuffyy</strong></a> (Roblox).</p>
   </nav>
 
@@ -911,6 +912,55 @@
         </div>
         <div class="tf-chart" id="ssChart"></div>
         <p class="tool-note">Dots mark your Ascension. The Midnight Harvester lifts the whole curve: &times;2 at Lv.0, +5% more per level.</p>
+      </div>
+
+      <div class="tool" id="xp-level-calc">
+        <h3>Level XP</h3>
+        <p>How much XP and time you need to reach a target level. XP needed for the next level is <strong>1.35 &times; Level&sup2;</strong>. Your Ascension, Rebirths and XP buffs only change how fast you earn XP, so put your current XP rate in the rate field.</p>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
+            <label for="xpLevel" class="tool-field-label">Current Level</label>
+            <input type="number" id="xpLevel" class="tool-input" min="1" value="276185">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="xpCurrent" class="tool-field-label">Current XP</label>
+            <input type="text" id="xpCurrent" class="tool-input" value="22.30B" autocomplete="off">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="xpTarget" class="tool-field-label">Target Level</label>
+            <input type="number" id="xpTarget" class="tool-input" min="1" value="300000">
+          </div>
+        </div>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
+            <label for="xpRate" class="tool-field-label">XP Rate</label>
+            <input type="text" id="xpRate" class="tool-input" value="100B" autocomplete="off">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="xpRateUnit" class="tool-field-label">Per</label>
+            <select id="xpRateUnit" class="tool-input">
+              <option value="1">Second</option>
+              <option value="60" selected>Minute</option>
+              <option value="3600">Hour</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">XP to target:</span>
+          <span class="tool-result-value" id="xpToTarget"></span>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">Time to target:</span>
+          <span class="tool-result-value" id="xpTimeToTarget"></span>
+        </div>
+        <div class="table-scroll">
+          <table class="tool-table" id="xpTable">
+            <thead><tr><th>Time</th><th>XP Earned</th><th>Level Reached</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="tool-note" id="xpNote"></p>
+        <p class="tool-note">XP fields take game-style numbers like <code>22.30B</code>, <code>1.5T</code> or <code>3e15</code>. The formula is fitted from six in-game readings from Lv.84,729 to Lv.276,185 and matches all of them; it's not taken from the game code. The game cuts numbers off instead of rounding, so it may show 49.10B where the formula gives 49.106B.</p>
       </div>
     </section>
 
