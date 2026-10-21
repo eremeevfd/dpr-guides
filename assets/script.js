@@ -1131,7 +1131,7 @@
   // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
   // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
   // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + Lone Survivor + relic + Death Coins + potion) × (1 + God of Time) × VIP 1.2 × Flood of Wisdom 1.25.
-  // Guild Boss: 613K × (GB level + 4) × M × kill bonus, 6 claims a day. Demon Realm: 512 × M per 0.3s tick, real ticks every ~0.321s.
+  // Guild Boss: 639K × (GB level + 4) × M × kill bonus, 6 claims a day. Demon Realm: 532 × M per 0.3s tick, real ticks every ~0.321s.
   var xpLevel = document.getElementById("xpLevel");
   var xpCurrent = document.getElementById("xpCurrent");
   var xpTarget = document.getElementById("xpTarget");
@@ -1162,9 +1162,10 @@
 
   if (xpLevel) {
     var XP_COEF = 1.35;
-    var DR_TICK_COEF = 512;
+    // Fitted on empty servers (no friends, patron or Shared Wisdom): main GB 639K, Lv.84k alt GB 638K / DR 532.
+    var DR_TICK_COEF = 532;
     var DR_TICK_REAL_SECONDS = 0.321;
-    var GB_COEF = 613e3;
+    var GB_COEF = 639e3;
     var GB_KILL_BONUS = [1, 1.1, 1.2, 1.3, 1.5, 2];
     var XP_SUFFIXES = { k: 1e3, m: 1e6, b: 1e9, t: 1e12, q: 1e15, qa: 1e15, qd: 1e15, qi: 1e18, qn: 1e18, sx: 1e21 };
     var XP_DAYS = [["1 day", 1], ["1 week", 7], ["30 days", 30], ["90 days", 90], ["1 year", 365]];
