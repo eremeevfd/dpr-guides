@@ -1130,20 +1130,31 @@
 
   // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
   // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
+  // Demon Realm (fitted): XP per 0.3s tick = 615 × Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + relic);
+  // real ticks land every ~0.321s.
   var xpLevel = document.getElementById("xpLevel");
   var xpCurrent = document.getElementById("xpCurrent");
   var xpTarget = document.getElementById("xpTarget");
-  var xpRate = document.getElementById("xpRate");
-  var xpRateUnit = document.getElementById("xpRateUnit");
+  var xpRebirths = document.getElementById("xpRebirths");
+  var xpAscension = document.getElementById("xpAscension");
+  var xpGuild = document.getElementById("xpGuild");
+  var xpRelic = document.getElementById("xpRelic");
+  var xpFriends = document.getElementById("xpFriends");
+  var xpPatron = document.getElementById("xpPatron");
+  var xpMinutes = document.getElementById("xpMinutes");
+  var xpGamepass = document.getElementById("xpGamepass");
+  var xpTick = document.getElementById("xpTick");
+  var xpPerRealm = document.getElementById("xpPerRealm");
   var xpToTarget = document.getElementById("xpToTarget");
-  var xpTimeToTarget = document.getElementById("xpTimeToTarget");
   var xpTableBody = document.querySelector("#xpTable tbody");
   var xpNote = document.getElementById("xpNote");
 
   if (xpLevel) {
     var XP_COEF = 1.35;
+    var DR_TICK_COEF = 615;
+    var DR_TICK_REAL_SECONDS = 0.321;
     var XP_SUFFIXES = { k: 1e3, m: 1e6, b: 1e9, t: 1e12, q: 1e15, qa: 1e15, qd: 1e15, qi: 1e18, qn: 1e18, sx: 1e21 };
-    var XP_PERIODS = [["1 hour", 3600], ["8 hours", 28800], ["1 day", 86400], ["1 week", 604800], ["30 days", 2592000]];
+    var XP_REALMS = [["1 (1 hour)", 1], ["8", 8], ["24 (1 day)", 24], ["168 (1 week)", 168], ["720 (30 days)", 720]];
 
     function xpForNext(level) {
       return XP_COEF * level * level;
@@ -1161,7 +1172,7 @@
       return n;
     }
 
-    // "22.30B", "1.5t", "3e15", "1,000" → number; NaN if unreadable
+    // "8.31B", "1.5t", "3e15", "1,000" → number; NaN if unreadable
     function parseXp(text) {
       var m = String(text).trim().replace(/,/g, "").match(/^([0-9]*\.?[0-9]+(?:e[+-]?[0-9]+)?)\s*([a-z]{0,2})$/i);
       if (!m) return NaN;
@@ -1186,26 +1197,48 @@
       return out.join(" ");
     }
 
+    function intField(el, min) {
+      return Math.max(Math.floor(parseFloat(el.value) || 0), min);
+    }
+
+    function tickXp(rebirths, ascension, guildPct, groupPct) {
+      return DR_TICK_COEF * rebirths * (1 + ascension) * (1 + guildPct / 100) * (1 + groupPct / 100);
+    }
+
     function renderXpLevel() {
-      var level = Math.max(Math.floor(parseFloat(xpLevel.value) || 1), 1);
-      var target = Math.max(Math.floor(parseFloat(xpTarget.value) || 1), 1);
+      var level = intField(xpLevel, 1);
+      var target = intField(xpTarget, 1);
       var current = parseXp(xpCurrent.value);
-      var rate = parseXp(xpRate.value);
       xpCurrent.classList.toggle("tool-input-invalid", isNaN(current));
-      xpRate.classList.toggle("tool-input-invalid", isNaN(rate));
       current = isNaN(current) ? 0 : Math.min(current, xpForNext(level));
-      var perSec = isNaN(rate) ? 0 : rate / parseFloat(xpRateUnit.value);
+
+      var rebirths = intField(xpRebirths, 0);
+      var ascension = intField(xpAscension, 0);
+      var guild = Math.max(parseFloat(xpGuild.value) || 0, 0);
+      var relic = Math.max(parseFloat(xpRelic.value) || 0, 0);
+      var friends = Math.min(intField(xpFriends, 0), 10);
+      var gamepass = xpGamepass.checked ? 100 : 0;
+      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + relic;
+      var minutes = Math.min(Math.max(parseFloat(xpMinutes.value) || 0, 0), 15);
+
+      var tick = tickXp(rebirths, ascension, guild, group);
+      var perSec = tick / DR_TICK_REAL_SECONDS;
+      var perRealm = perSec * minutes * 60;
 
       var start = xpTotalAt(level) + current;
       var needed = Math.max(xpTotalAt(target) - start, 0);
-      xpToTarget.textContent = target <= level
-        ? "Already past Lv." + target.toLocaleString()
-        : formatBig(needed) + " (Lv." + level.toLocaleString() + " → Lv." + target.toLocaleString() + ")";
-      xpTimeToTarget.textContent = target <= level ? "—" : perSec > 0 ? formatDuration(needed / perSec) : "enter your XP rate";
+      xpTick.textContent = formatBig(tick) + "exp / 0.3s (≈ " + formatBig(perSec) + " XP/s real)";
+      xpPerRealm.textContent = formatBig(perRealm) + " XP" + (perRealm > 0 ? " (" + parseFloat((perRealm / xpForNext(level)).toPrecision(3)) + " levels at Lv." + level.toLocaleString() + ")" : "");
+      if (target <= level) {
+        xpToTarget.textContent = "Already past Lv." + target.toLocaleString();
+      } else {
+        var realms = perRealm > 0 ? Math.ceil(needed / perRealm) : Infinity;
+        xpToTarget.textContent = formatBig(needed) + " XP = " + (isFinite(realms) ? realms.toLocaleString() + " Demon Realms (≈ " + formatDuration(realms * 3600) + ")" : "never with 0 income");
+      }
 
       xpTableBody.innerHTML = "";
-      XP_PERIODS.forEach(function (p) {
-        var earned = perSec * p[1];
+      XP_REALMS.forEach(function (p) {
+        var earned = perRealm * p[1];
         var reached = levelForTotal(start + earned);
         var tr = document.createElement("tr");
         tr.innerHTML = "<td>" + p[0] + "</td><td>" + formatBig(earned) + "</td><td>Lv." + reached.toLocaleString() +
@@ -1213,13 +1246,16 @@
         xpTableBody.appendChild(tr);
       });
 
-      var next = xpForNext(level);
-      xpNote.textContent = "Lv." + level.toLocaleString() + " needs " + formatBig(next) + " XP; you have " + formatBig(next - current) + " to go" +
-        (perSec > 0 ? " (" + formatDuration((next - current) / perSec) + ")" : "") + ".";
+      var pct = function (next) { return "+" + ((next / tick - 1) * 100).toFixed(2) + "%"; };
+      xpNote.textContent = tick > 0
+        ? "Worth to you: +1 Rebirth " + pct(tickXp(rebirths + 1, ascension, guild, group)) +
+          ", +1 Ascension " + pct(tickXp(rebirths, ascension + 1, guild, group)) +
+          ", +10% relic Exp or one more friend " + pct(tickXp(rebirths, ascension, guild, group + 10)) + "."
+        : "Enter your Rebirths to see your Demon Realm income.";
     }
 
     var scheduleXpLevel = perFrame(renderXpLevel);
-    [xpLevel, xpCurrent, xpTarget, xpRate, xpRateUnit].forEach(function (el) {
+    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpMinutes, xpGamepass].forEach(function (el) {
       el.addEventListener("input", scheduleXpLevel);
       el.addEventListener("change", scheduleXpLevel);
     });
