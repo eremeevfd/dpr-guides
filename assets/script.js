@@ -1130,8 +1130,8 @@
 
   // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
   // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
-  // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + relic).
-  // Guild Boss: 736K × (GB level + 4) × M × kill bonus, 6 claims a day. Demon Realm: 615 × M per 0.3s tick, real ticks every ~0.321s.
+  // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + relic + God of Time + Death Coins + potion) × VIP 1.2 × Flood of Wisdom 1.25.
+  // Guild Boss: 613K × (GB level + 4) × M × kill bonus, 6 claims a day. Demon Realm: 512 × M per 0.3s tick, real ticks every ~0.321s.
   var xpLevel = document.getElementById("xpLevel");
   var xpCurrent = document.getElementById("xpCurrent");
   var xpTarget = document.getElementById("xpTarget");
@@ -1146,6 +1146,11 @@
   var xpRealms = document.getElementById("xpRealms");
   var xpMinutes = document.getElementById("xpMinutes");
   var xpGamepass = document.getElementById("xpGamepass");
+  var xpTimeGod = document.getElementById("xpTimeGod");
+  var xpDeathCoin = document.getElementById("xpDeathCoin");
+  var xpPotion = document.getElementById("xpPotion");
+  var xpVip = document.getElementById("xpVip");
+  var xpPillar = document.getElementById("xpPillar");
   var xpPerGb = document.getElementById("xpPerGb");
   var xpPerRealm = document.getElementById("xpPerRealm");
   var xpPerDay = document.getElementById("xpPerDay");
@@ -1155,9 +1160,9 @@
 
   if (xpLevel) {
     var XP_COEF = 1.35;
-    var DR_TICK_COEF = 615;
+    var DR_TICK_COEF = 512;
     var DR_TICK_REAL_SECONDS = 0.321;
-    var GB_COEF = 736e3;
+    var GB_COEF = 613e3;
     var GB_KILL_BONUS = [1, 1.1, 1.2, 1.3, 1.5, 2];
     var XP_SUFFIXES = { k: 1e3, m: 1e6, b: 1e9, t: 1e12, q: 1e15, qa: 1e15, qd: 1e15, qi: 1e18, qn: 1e18, sx: 1e21 };
     var XP_DAYS = [["1 day", 1], ["1 week", 7], ["30 days", 30], ["90 days", 90], ["1 year", 365]];
@@ -1207,8 +1212,9 @@
       return Math.max(Math.floor(parseFloat(el.value) || 0), min);
     }
 
-    function xpMultiplier(rebirths, ascension, guildPct, groupPct) {
-      return rebirths * (1 + ascension) * (1 + guildPct / 100) * (1 + groupPct / 100);
+    // `separate` = product of the buffs that multiply on their own (VIP, Flood of Wisdom)
+    function xpMultiplier(rebirths, ascension, guildPct, groupPct, separate) {
+      return rebirths * (1 + ascension) * (1 + guildPct / 100) * (1 + groupPct / 100) * separate;
     }
 
     function gbKillBonusTotal(claims) {
@@ -1228,7 +1234,13 @@
       var relic = Math.max(parseFloat(xpRelic.value) || 0, 0);
       var friends = Math.min(intField(xpFriends, 0), 10);
       var gamepass = xpGamepass.checked ? 100 : 0;
-      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + relic;
+      var timeGod = parseFloat(xpTimeGod.value);
+      var deathCoin = Math.max(parseFloat(xpDeathCoin.value) || 0, 0);
+      // God of Time, Death Coins and the EXP Potion are assumed to join the additive group; not yet measured in-game.
+      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + relic + timeGod + deathCoin + (xpPotion.checked ? 100 : 0);
+      // VIP was on in every test, so the fitted constants are without it; it must sit outside the additive group,
+      // since relics measured ×1.40 (3.5/2.5) on Boss Rewards, not ×1.37 (3.7/2.7). Flood of Wisdom ×1.25 is unmeasured.
+      var separate = (xpVip.checked ? 1.2 : 1) * (xpPillar.checked ? 1.25 : 1);
       var gbLevel = intField(xpGbLevel, 0);
       var gbClaims = Math.min(intField(xpGbClaims, 0), 6);
       var realmsPerDay = Math.min(intField(xpRealms, 0), 24);
@@ -1240,7 +1252,7 @@
         return GB_COEF * (gbLvl + 4) * mult * gbKillBonusTotal(gbClaims) + perRealm * realmsPerDay;
       }
 
-      var mult = xpMultiplier(rebirths, ascension, guild, group);
+      var mult = xpMultiplier(rebirths, ascension, guild, group, separate);
       var tick = DR_TICK_COEF * mult;
       var perRealm = tick / DR_TICK_REAL_SECONDS * minutes * 60;
       var gbFirst = GB_COEF * (gbLevel + 4) * mult;
@@ -1271,15 +1283,17 @@
 
       var pct = function (next) { return "+" + ((next / perDay - 1) * 100).toFixed(2) + "%"; };
       xpNote.textContent = perDay > 0
-        ? "Worth to you per day: +1 Rebirth " + pct(dailyXp(xpMultiplier(rebirths + 1, ascension, guild, group), gbLevel)) +
-          ", +1 Ascension " + pct(dailyXp(xpMultiplier(rebirths, ascension + 1, guild, group), gbLevel)) +
-          ", +10% relic Exp or one more friend " + pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + 10), gbLevel)) +
-          ", +1 GB Level " + pct(dailyXp(mult, gbLevel + 1)) + "."
+        ? "Worth to you per day: +1 Rebirth " + pct(dailyXp(xpMultiplier(rebirths + 1, ascension, guild, group, separate), gbLevel)) +
+          ", +1 Ascension " + pct(dailyXp(xpMultiplier(rebirths, ascension + 1, guild, group, separate), gbLevel)) +
+          ", +10% relic Exp or one more friend " + pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + 10, separate), gbLevel)) +
+          ", +1 GB Level " + pct(dailyXp(mult, gbLevel + 1)) +
+          (timeGod < 100 ? ", " + (timeGod ? "+1 God of Time level " : "awakening God of Time ") +
+            pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + (timeGod ? 4.75 : 5), separate), gbLevel)) : "") + "."
         : "Enter your Rebirths to see your XP income.";
     }
 
     var scheduleXpLevel = perFrame(renderXpLevel);
-    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass].forEach(function (el) {
+    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass, xpTimeGod, xpDeathCoin, xpPotion, xpVip, xpPillar].forEach(function (el) {
       el.addEventListener("input", scheduleXpLevel);
       el.addEventListener("change", scheduleXpLevel);
     });

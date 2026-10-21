@@ -967,6 +967,51 @@
         </div>
         <div class="tool-row">
           <div class="tool-field tool-field-small">
+            <label for="xpTimeGod" class="tool-field-label">God of Time</label>
+            <select id="xpTimeGod" class="tool-input">
+              <option value="0" selected>Not awakened</option>
+              <option value="5">Lv.0 (+5%)</option>
+              <option value="9.75">Lv.1 (+9.75%)</option>
+              <option value="14.5">Lv.2 (+14.5%)</option>
+              <option value="19.25">Lv.3 (+19.25%)</option>
+              <option value="24">Lv.4 (+24%)</option>
+              <option value="28.75">Lv.5 (+28.75%)</option>
+              <option value="33.5">Lv.6 (+33.5%)</option>
+              <option value="38.25">Lv.7 (+38.25%)</option>
+              <option value="43">Lv.8 (+43%)</option>
+              <option value="47.75">Lv.9 (+47.75%)</option>
+              <option value="52.5">Lv.10 (+52.5%)</option>
+              <option value="57.25">Lv.11 (+57.25%)</option>
+              <option value="62">Lv.12 (+62%)</option>
+              <option value="66.75">Lv.13 (+66.75%)</option>
+              <option value="71.5">Lv.14 (+71.5%)</option>
+              <option value="76.25">Lv.15 (+76.25%)</option>
+              <option value="81">Lv.16 (+81%)</option>
+              <option value="85.75">Lv.17 (+85.75%)</option>
+              <option value="90.5">Lv.18 (+90.5%)</option>
+              <option value="95.25">Lv.19 (+95.25%)</option>
+              <option value="100">Lv.20 (+100%)</option>
+            </select>
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="xpDeathCoin" class="tool-field-label">Death Coin EXP %</label>
+            <input type="number" id="xpDeathCoin" class="tool-input" min="0" value="0">
+          </div>
+          <div class="tool-field tool-field-auto">
+            <span class="tool-field-label">&nbsp;</span>
+            <label class="tool-check-row"><input type="checkbox" id="xpPotion"> EXP Potion (+100%)</label>
+          </div>
+        </div>
+        <div class="tool-row">
+          <div class="tool-field tool-field-auto">
+            <label class="tool-check-row"><input type="checkbox" id="xpVip" checked> VIP (EXP Boost +20%)</label>
+          </div>
+          <div class="tool-field tool-field-auto">
+            <label class="tool-check-row"><input type="checkbox" id="xpPillar"> Flood of Wisdom pillar (Exp &times;125%)</label>
+          </div>
+        </div>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
             <label for="xpGbLevel" class="tool-field-label">GB Level</label>
             <input type="number" id="xpGbLevel" class="tool-input" min="1" value="75">
           </div>
@@ -1015,14 +1060,14 @@
         <div class="tool-group">
           <p class="tool-group-label">XP formulas</p>
           <p class="tool-note">Every XP source we've measured uses the same multiplier:</p>
-          <p class="tool-formula"><strong>M = Rebirths &times; (1 + Ascension) &times; (1 + Guild %) &times; (1 + Double XP + Friends + Patron + Relic Exp %)</strong></p>
-          <p class="tool-note">Each Rebirth multiplies your XP by your Rebirth count, so Rebirth 391 earns 391/390 of Rebirth 390. Each Ascension adds +100% of your base. The last group adds up: Double XP Boost is +100%, each friend in the server +10%, the Grand Patron title +5% to +25%, and relics their Exp %. Because they add up, a +100% relic on top of Double XP and a few friends raises XP by about 40%, not &times;2.</p>
-          <p class="tool-formula"><strong>Guild Boss: EXP &asymp; 736K &times; (GB Level + 4) &times; M &times; kill bonus</strong></p>
+          <p class="tool-formula"><strong>M = Rebirths &times; (1 + Ascension) &times; (1 + Guild %) &times; (1 + Double XP + Friends + Patron + Relic Exp % + God of Time + Death Coins + EXP Potion) &times; VIP 1.2 &times; Flood of Wisdom 1.25</strong></p>
+          <p class="tool-note">Each Rebirth multiplies your XP by your Rebirth count, so Rebirth 391 earns 391/390 of Rebirth 390. Each Ascension adds +100% of your base. The last group adds up: Double XP Boost is +100%, each friend in the server +10%, the Grand Patron title +5% to +25%, relics their Exp %, the God of Time class 5% at Lv.0 plus 4.75% per level (100% at Lv.20), Death Coins their EXP % (a full set of five 60% coins is +300%) and an EXP Potion +100%. Because they add up, a +100% relic on top of Double XP and a few friends raises XP by about 40%, not &times;2. VIP&rsquo;s +20% is not in that group: with VIP on, a +100% relic still raised Boss Rewards by exactly &times;1.40, so VIP multiplies on its own.</p>
+          <p class="tool-formula"><strong>Guild Boss: EXP &asymp; 613K &times; (GB Level + 4) &times; M &times; kill bonus</strong></p>
           <p class="tool-note">You can claim 6 GB rewards per day. The kill bonus grows with each one: &times;1.0, 1.1, 1.2, 1.3, 1.5 and &times;2.0 for the 6th, so all six together are worth 8.1 first kills. The GB's coin reward (the +1,655 next to the level) follows 23 &times; (GB Level + 4).</p>
-          <p class="tool-formula"><strong>Demon Realm: XP per 0.3s &asymp; 615 &times; M</strong></p>
+          <p class="tool-formula"><strong>Demon Realm: XP per 0.3s &asymp; 512 &times; M</strong></p>
           <p class="tool-note">Once the Demon Realm boss dies, everyone in the server gets this every 0.3s until the realm closes at :50. Ticks actually land about every 0.32s, so real income is about 93% of the number the realm shows.</p>
         </div>
-        <p class="tool-note">These formulas are fitted from our own in-game readings, not taken from the game code. Level XP matches six readings from Lv.84,729 to Lv.276,185. The multiplier matches three characters (Ascension 44&ndash;71, Rebirth 235&ndash;390) within 2%, and relic, Friend and Rebirth changes within 0.3%. Whether the guild % multiplies separately is the least certain part. The GB Level term is based on just two characters (GB Lv.68 and Lv.75), so treat it as a good guess. Hellroad isn't counted. XP fields take game-style numbers like <code>8.31B</code>, <code>1.5T</code> or <code>3e15</code>.</p>
+        <p class="tool-note">These formulas are fitted from our own in-game readings, not taken from the game code. Level XP matches six readings from Lv.84,729 to Lv.276,185. The multiplier matches three characters (Ascension 44&ndash;71, Rebirth 235&ndash;390) within 2%, and relic, Friend and Rebirth changes within 0.3%. Whether the guild % multiplies separately is the least certain part. The GB Level term is based on just two characters (GB Lv.68 and Lv.75), so treat it as a good guess. God of Time, Death Coins, EXP Potions and Flood of Wisdom weren't active in any of our tests, so where they sit in the formula is a guess: if a buff in the additive group turns out to multiply separately, real XP will be higher than shown. VIP was on in every test. Hellroad isn't counted. XP fields take game-style numbers like <code>8.31B</code>, <code>1.5T</code> or <code>3e15</code>.</p>
       </div>
     </section>
 
