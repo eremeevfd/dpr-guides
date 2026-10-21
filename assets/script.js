@@ -1127,4 +1127,162 @@
     });
     renderSoulSpawner();
   }
+
+  // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
+  // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
+  // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + relic).
+  // Guild Boss: 736K × (GB level + 4) × M × kill bonus, 6 claims a day. Demon Realm: 615 × M per 0.3s tick, real ticks every ~0.321s.
+  var xpLevel = document.getElementById("xpLevel");
+  var xpCurrent = document.getElementById("xpCurrent");
+  var xpTarget = document.getElementById("xpTarget");
+  var xpRebirths = document.getElementById("xpRebirths");
+  var xpAscension = document.getElementById("xpAscension");
+  var xpGuild = document.getElementById("xpGuild");
+  var xpRelic = document.getElementById("xpRelic");
+  var xpFriends = document.getElementById("xpFriends");
+  var xpPatron = document.getElementById("xpPatron");
+  var xpGbLevel = document.getElementById("xpGbLevel");
+  var xpGbClaims = document.getElementById("xpGbClaims");
+  var xpRealms = document.getElementById("xpRealms");
+  var xpMinutes = document.getElementById("xpMinutes");
+  var xpGamepass = document.getElementById("xpGamepass");
+  var xpPerGb = document.getElementById("xpPerGb");
+  var xpPerRealm = document.getElementById("xpPerRealm");
+  var xpPerDay = document.getElementById("xpPerDay");
+  var xpToTarget = document.getElementById("xpToTarget");
+  var xpTableBody = document.querySelector("#xpTable tbody");
+  var xpNote = document.getElementById("xpNote");
+
+  if (xpLevel) {
+    var XP_COEF = 1.35;
+    var DR_TICK_COEF = 615;
+    var DR_TICK_REAL_SECONDS = 0.321;
+    var GB_COEF = 736e3;
+    var GB_KILL_BONUS = [1, 1.1, 1.2, 1.3, 1.5, 2];
+    var XP_SUFFIXES = { k: 1e3, m: 1e6, b: 1e9, t: 1e12, q: 1e15, qa: 1e15, qd: 1e15, qi: 1e18, qn: 1e18, sx: 1e21 };
+    var XP_DAYS = [["1 day", 1], ["1 week", 7], ["30 days", 30], ["90 days", 90], ["1 year", 365]];
+
+    function xpForNext(level) {
+      return XP_COEF * level * level;
+    }
+
+    function xpTotalAt(level) {
+      return XP_COEF * (level - 1) * level * (2 * level - 1) / 6;
+    }
+
+    // inverse of xpTotalAt: highest level whose total XP fits in `total`
+    function levelForTotal(total) {
+      var n = Math.max(Math.floor(Math.cbrt(total / (XP_COEF / 3))), 1);
+      while (n > 1 && xpTotalAt(n) > total) n--;
+      while (xpTotalAt(n + 1) <= total) n++;
+      return n;
+    }
+
+    // "8.31B", "1.5t", "3e15", "1,000" → number; NaN if unreadable
+    function parseXp(text) {
+      var m = String(text).trim().replace(/,/g, "").match(/^([0-9]*\.?[0-9]+(?:e[+-]?[0-9]+)?)\s*([a-z]{0,2})$/i);
+      if (!m) return NaN;
+      var unit = m[2].toLowerCase();
+      if (unit && !(unit in XP_SUFFIXES)) return NaN;
+      return parseFloat(m[1]) * (unit ? XP_SUFFIXES[unit] : 1);
+    }
+
+    function formatDuration(seconds) {
+      if (!isFinite(seconds)) return "never";
+      if (seconds < 60) return Math.ceil(seconds) + "s";
+      var parts = [[31536000, "y"], [86400, "d"], [3600, "h"], [60, "m"]];
+      var out = [];
+      var rest = Math.round(seconds / 60) * 60;
+      for (var i = 0; i < parts.length && out.length < 2; i++) {
+        var count = Math.floor(rest / parts[i][0]);
+        if (count > 0 || out.length) {
+          if (count > 0) out.push(count + parts[i][1]);
+          rest -= count * parts[i][0];
+        }
+      }
+      return out.join(" ");
+    }
+
+    function intField(el, min) {
+      return Math.max(Math.floor(parseFloat(el.value) || 0), min);
+    }
+
+    function xpMultiplier(rebirths, ascension, guildPct, groupPct) {
+      return rebirths * (1 + ascension) * (1 + guildPct / 100) * (1 + groupPct / 100);
+    }
+
+    function gbKillBonusTotal(claims) {
+      return GB_KILL_BONUS.slice(0, claims).reduce(function (sum, b) { return sum + b; }, 0);
+    }
+
+    function renderXpLevel() {
+      var level = intField(xpLevel, 1);
+      var target = intField(xpTarget, 1);
+      var current = parseXp(xpCurrent.value);
+      xpCurrent.classList.toggle("tool-input-invalid", isNaN(current));
+      current = isNaN(current) ? 0 : Math.min(current, xpForNext(level));
+
+      var rebirths = intField(xpRebirths, 0);
+      var ascension = intField(xpAscension, 0);
+      var guild = Math.max(parseFloat(xpGuild.value) || 0, 0);
+      var relic = Math.max(parseFloat(xpRelic.value) || 0, 0);
+      var friends = Math.min(intField(xpFriends, 0), 10);
+      var gamepass = xpGamepass.checked ? 100 : 0;
+      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + relic;
+      var gbLevel = intField(xpGbLevel, 0);
+      var gbClaims = Math.min(intField(xpGbClaims, 0), 6);
+      var realmsPerDay = Math.min(intField(xpRealms, 0), 24);
+      var minutes = Math.min(Math.max(parseFloat(xpMinutes.value) || 0, 0), 15);
+
+      // daily XP for a given multiplier and GB level
+      function dailyXp(mult, gbLvl) {
+        var perRealm = DR_TICK_COEF * mult / DR_TICK_REAL_SECONDS * minutes * 60;
+        return GB_COEF * (gbLvl + 4) * mult * gbKillBonusTotal(gbClaims) + perRealm * realmsPerDay;
+      }
+
+      var mult = xpMultiplier(rebirths, ascension, guild, group);
+      var tick = DR_TICK_COEF * mult;
+      var perRealm = tick / DR_TICK_REAL_SECONDS * minutes * 60;
+      var gbFirst = GB_COEF * (gbLevel + 4) * mult;
+      var gbDay = gbFirst * gbKillBonusTotal(gbClaims);
+      var perDay = dailyXp(mult, gbLevel);
+      var levelsOf = function (xp) { return parseFloat((xp / xpForNext(level)).toPrecision(3)) + " levels"; };
+
+      var start = xpTotalAt(level) + current;
+      var needed = Math.max(xpTotalAt(target) - start, 0);
+      xpPerGb.textContent = formatBig(gbDay) + " XP (" + levelsOf(gbDay) + "; 1st kill " + formatBig(gbFirst) + ")";
+      xpPerRealm.textContent = formatBig(perRealm) + " XP each (" + levelsOf(perRealm) + "; in-game rate " + formatBig(tick) + "exp / 0.3s)";
+      xpPerDay.textContent = formatBig(perDay) + " XP (" + levelsOf(perDay) + " at Lv." + level.toLocaleString() + ")";
+      if (target <= level) {
+        xpToTarget.textContent = "Already past Lv." + target.toLocaleString();
+      } else {
+        xpToTarget.textContent = formatBig(needed) + " XP, " + (perDay > 0 ? "about " + formatDuration(needed / perDay * 86400) : "never with 0 income");
+      }
+
+      xpTableBody.innerHTML = "";
+      XP_DAYS.forEach(function (p) {
+        var earned = perDay * p[1];
+        var reached = levelForTotal(start + earned);
+        var tr = document.createElement("tr");
+        tr.innerHTML = "<td>" + p[0] + "</td><td>" + formatBig(earned) + "</td><td>Lv." + reached.toLocaleString() +
+          " (+" + (reached - level).toLocaleString() + ")</td>";
+        xpTableBody.appendChild(tr);
+      });
+
+      var pct = function (next) { return "+" + ((next / perDay - 1) * 100).toFixed(2) + "%"; };
+      xpNote.textContent = perDay > 0
+        ? "Worth to you per day: +1 Rebirth " + pct(dailyXp(xpMultiplier(rebirths + 1, ascension, guild, group), gbLevel)) +
+          ", +1 Ascension " + pct(dailyXp(xpMultiplier(rebirths, ascension + 1, guild, group), gbLevel)) +
+          ", +10% relic Exp or one more friend " + pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + 10), gbLevel)) +
+          ", +1 GB Level " + pct(dailyXp(mult, gbLevel + 1)) + "."
+        : "Enter your Rebirths to see your XP income.";
+    }
+
+    var scheduleXpLevel = perFrame(renderXpLevel);
+    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass].forEach(function (el) {
+      el.addEventListener("input", scheduleXpLevel);
+      el.addEventListener("change", scheduleXpLevel);
+    });
+    renderXpLevel();
+  }
 })();
