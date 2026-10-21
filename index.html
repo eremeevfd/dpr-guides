@@ -916,7 +916,7 @@
 
       <div class="tool" id="xp-level-calc">
         <h3>Level XP</h3>
-        <p>How many Demon Realms it takes to reach a target level. XP needed for the next level is <strong>1.35 &times; Level&sup2;</strong>. Demon Realm income doesn't depend on your level at all: it comes from your Rebirths, Ascension and XP buffs, so higher levels take longer and longer.</p>
+        <p>How many days of Guild Boss (GB) rewards and Demon Realms it takes to reach a target level. XP needed for the next level is <strong>1.35 &times; Level&sup2;</strong>. Your XP income doesn't depend on your level at all: it comes from your Rebirths, Ascension, XP buffs and GB level, so higher levels take longer and longer.</p>
         <div class="tool-row">
           <div class="tool-field tool-field-small">
             <label for="xpLevel" class="tool-field-label">Current Level</label>
@@ -967,21 +967,39 @@
         </div>
         <div class="tool-row">
           <div class="tool-field tool-field-small">
-            <label for="xpMinutes" class="tool-field-label">Income Minutes</label>
-            <input type="number" id="xpMinutes" class="tool-input" min="0" max="15" step="0.5" value="14.5">
+            <label for="xpGbLevel" class="tool-field-label">GB Level</label>
+            <input type="number" id="xpGbLevel" class="tool-input" min="1" value="75">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="xpGbClaims" class="tool-field-label">GB Claims per Day</label>
+            <input type="number" id="xpGbClaims" class="tool-input" min="0" max="6" value="6">
           </div>
           <div class="tool-field tool-field-auto">
             <span class="tool-field-label">&nbsp;</span>
             <label class="tool-check-row"><input type="checkbox" id="xpGamepass" checked> Double XP Boost gamepass</label>
           </div>
         </div>
-        <div class="tool-result">
-          <span class="tool-result-label">In-game rate:</span>
-          <span class="tool-result-value" id="xpTick"></span>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
+            <label for="xpRealms" class="tool-field-label">Demon Realms per Day</label>
+            <input type="number" id="xpRealms" class="tool-input" min="0" max="24" value="24">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="xpMinutes" class="tool-field-label">Income Minutes</label>
+            <input type="number" id="xpMinutes" class="tool-input" min="0" max="15" step="0.5" value="14.5">
+          </div>
         </div>
         <div class="tool-result">
-          <span class="tool-result-label">Per Demon Realm:</span>
+          <span class="tool-result-label">GB per day:</span>
+          <span class="tool-result-value" id="xpPerGb"></span>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">Demon Realm:</span>
           <span class="tool-result-value" id="xpPerRealm"></span>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">Per day:</span>
+          <span class="tool-result-value" id="xpPerDay"></span>
         </div>
         <div class="tool-result">
           <span class="tool-result-label">To target:</span>
@@ -989,18 +1007,22 @@
         </div>
         <div class="table-scroll">
           <table class="tool-table" id="xpTable">
-            <thead><tr><th>Demon Realms</th><th>XP Earned</th><th>Level Reached</th></tr></thead>
+            <thead><tr><th>Time</th><th>XP Earned</th><th>Level Reached</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
         <p class="tool-note" id="xpNote"></p>
         <div class="tool-group">
-          <p class="tool-group-label">Demon Realm XP formula</p>
-          <p class="tool-note">Once the Demon Realm boss dies, everyone in the server gets XP every 0.3s until the realm closes at :50. The rate shown in the realm is:</p>
-          <p class="tool-formula"><strong>XP per 0.3s &asymp; 615 &times; Rebirths &times; (1 + Ascension) &times; (1 + Guild %) &times; (1 + Double XP + Friends + Patron + Relic Exp %)</strong></p>
-          <p class="tool-note">Each Rebirth multiplies your XP by your Rebirth count, so Rebirth 391 earns 391/390 of Rebirth 390. Each Ascension adds +100% of your base. The last group adds up: Double XP Boost is +100%, each friend in the server +10%, the Grand Patron title +5% to +25%, and relics their Exp %. Because they add up, a +100% relic on top of Double XP and a few friends raises XP by about 40%, not &times;2. Ticks actually land about every 0.32s, so real income is about 93% of the in-game number.</p>
+          <p class="tool-group-label">XP formulas</p>
+          <p class="tool-note">Every XP source we've measured uses the same multiplier:</p>
+          <p class="tool-formula"><strong>M = Rebirths &times; (1 + Ascension) &times; (1 + Guild %) &times; (1 + Double XP + Friends + Patron + Relic Exp %)</strong></p>
+          <p class="tool-note">Each Rebirth multiplies your XP by your Rebirth count, so Rebirth 391 earns 391/390 of Rebirth 390. Each Ascension adds +100% of your base. The last group adds up: Double XP Boost is +100%, each friend in the server +10%, the Grand Patron title +5% to +25%, and relics their Exp %. Because they add up, a +100% relic on top of Double XP and a few friends raises XP by about 40%, not &times;2.</p>
+          <p class="tool-formula"><strong>Guild Boss: EXP &asymp; 736K &times; (GB Level + 4) &times; M &times; kill bonus</strong></p>
+          <p class="tool-note">You can claim 6 GB rewards per day. The kill bonus grows with each one: &times;1.0, 1.1, 1.2, 1.3, 1.5 and &times;2.0 for the 6th, so all six together are worth 8.1 first kills. The GB's coin reward (the +1,655 next to the level) follows 23 &times; (GB Level + 4).</p>
+          <p class="tool-formula"><strong>Demon Realm: XP per 0.3s &asymp; 615 &times; M</strong></p>
+          <p class="tool-note">Once the Demon Realm boss dies, everyone in the server gets this every 0.3s until the realm closes at :50. Ticks actually land about every 0.32s, so real income is about 93% of the number the realm shows.</p>
         </div>
-        <p class="tool-note">Both formulas are fitted from our own in-game readings, not taken from the game code. Level XP matches six readings from Lv.84,729 to Lv.276,185. The Demon Realm formula matches three characters (Ascension 44&ndash;71, Rebirth 235&ndash;390) within 2%, and relic, Friend and Rebirth changes within 0.3%. Whether the guild % multiplies separately is the least certain part. The calculator only counts Demon Realm income, not Hellroad or boss kills. XP fields take game-style numbers like <code>8.31B</code>, <code>1.5T</code> or <code>3e15</code>.</p>
+        <p class="tool-note">These formulas are fitted from our own in-game readings, not taken from the game code. Level XP matches six readings from Lv.84,729 to Lv.276,185. The multiplier matches three characters (Ascension 44&ndash;71, Rebirth 235&ndash;390) within 2%, and relic, Friend and Rebirth changes within 0.3%. Whether the guild % multiplies separately is the least certain part. The GB Level term is based on just two characters (GB Lv.68 and Lv.75), so treat it as a good guess. Hellroad isn't counted. XP fields take game-style numbers like <code>8.31B</code>, <code>1.5T</code> or <code>3e15</code>.</p>
       </div>
     </section>
 
