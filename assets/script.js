@@ -1130,7 +1130,7 @@
 
   // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
   // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
-  // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + relic).
+  // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + relic + God of Time + Death Coins).
   // Guild Boss: 736K × (GB level + 4) × M × kill bonus, 6 claims a day. Demon Realm: 615 × M per 0.3s tick, real ticks every ~0.321s.
   var xpLevel = document.getElementById("xpLevel");
   var xpCurrent = document.getElementById("xpCurrent");
@@ -1146,6 +1146,8 @@
   var xpRealms = document.getElementById("xpRealms");
   var xpMinutes = document.getElementById("xpMinutes");
   var xpGamepass = document.getElementById("xpGamepass");
+  var xpTimeGod = document.getElementById("xpTimeGod");
+  var xpDeathCoin = document.getElementById("xpDeathCoin");
   var xpPerGb = document.getElementById("xpPerGb");
   var xpPerRealm = document.getElementById("xpPerRealm");
   var xpPerDay = document.getElementById("xpPerDay");
@@ -1228,7 +1230,10 @@
       var relic = Math.max(parseFloat(xpRelic.value) || 0, 0);
       var friends = Math.min(intField(xpFriends, 0), 10);
       var gamepass = xpGamepass.checked ? 100 : 0;
-      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + relic;
+      var timeGod = parseFloat(xpTimeGod.value);
+      var deathCoin = Math.max(parseFloat(xpDeathCoin.value) || 0, 0);
+      // God of Time and Death Coins are assumed to join the additive group; not yet measured in-game.
+      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + relic + timeGod + deathCoin;
       var gbLevel = intField(xpGbLevel, 0);
       var gbClaims = Math.min(intField(xpGbClaims, 0), 6);
       var realmsPerDay = Math.min(intField(xpRealms, 0), 24);
@@ -1274,12 +1279,14 @@
         ? "Worth to you per day: +1 Rebirth " + pct(dailyXp(xpMultiplier(rebirths + 1, ascension, guild, group), gbLevel)) +
           ", +1 Ascension " + pct(dailyXp(xpMultiplier(rebirths, ascension + 1, guild, group), gbLevel)) +
           ", +10% relic Exp or one more friend " + pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + 10), gbLevel)) +
-          ", +1 GB Level " + pct(dailyXp(mult, gbLevel + 1)) + "."
+          ", +1 GB Level " + pct(dailyXp(mult, gbLevel + 1)) +
+          (timeGod < 100 ? ", " + (timeGod ? "+1 God of Time level " : "awakening God of Time ") +
+            pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + (timeGod ? 4.75 : 5)), gbLevel)) : "") + "."
         : "Enter your Rebirths to see your XP income.";
     }
 
     var scheduleXpLevel = perFrame(renderXpLevel);
-    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass].forEach(function (el) {
+    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass, xpTimeGod, xpDeathCoin].forEach(function (el) {
       el.addEventListener("input", scheduleXpLevel);
       el.addEventListener("change", scheduleXpLevel);
     });
