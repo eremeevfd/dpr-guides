@@ -1130,7 +1130,7 @@
 
   // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
   // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
-  // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + relic + God of Time + Death Coins + potion) × VIP 1.2 × Flood of Wisdom 1.25.
+  // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + Lone Survivor + relic + Death Coins + potion) × (1 + God of Time) × VIP 1.2 × Flood of Wisdom 1.25.
   // Guild Boss: 613K × (GB level + 4) × M × kill bonus, 6 claims a day. Demon Realm: 512 × M per 0.3s tick, real ticks every ~0.321s.
   var xpLevel = document.getElementById("xpLevel");
   var xpCurrent = document.getElementById("xpCurrent");
@@ -1151,6 +1151,8 @@
   var xpPotion = document.getElementById("xpPotion");
   var xpVip = document.getElementById("xpVip");
   var xpPillar = document.getElementById("xpPillar");
+  var xpSharedTimeGod = document.getElementById("xpSharedTimeGod");
+  var xpLoneSurvivor = document.getElementById("xpLoneSurvivor");
   var xpPerGb = document.getElementById("xpPerGb");
   var xpPerRealm = document.getElementById("xpPerRealm");
   var xpPerDay = document.getElementById("xpPerDay");
@@ -1212,7 +1214,7 @@
       return Math.max(Math.floor(parseFloat(el.value) || 0), min);
     }
 
-    // `separate` = product of the buffs that multiply on their own (VIP, Flood of Wisdom)
+    // `separate` = product of the buffs that multiply on their own (God of Time, VIP, Flood of Wisdom)
     function xpMultiplier(rebirths, ascension, guildPct, groupPct, separate) {
       return rebirths * (1 + ascension) * (1 + guildPct / 100) * (1 + groupPct / 100) * separate;
     }
@@ -1236,11 +1238,17 @@
       var gamepass = xpGamepass.checked ? 100 : 0;
       var timeGod = parseFloat(xpTimeGod.value);
       var deathCoin = Math.max(parseFloat(xpDeathCoin.value) || 0, 0);
-      // God of Time, Death Coins and the EXP Potion are assumed to join the additive group; not yet measured in-game.
-      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + relic + timeGod + deathCoin + (xpPotion.checked ? 100 : 0);
+      // Shared Wisdom: 20% of the best God of Time bonus in the server; your own replaces it when higher
+      // (own Lv.12 measured ×1.533 = 1.62 / 1.0575 on a server with a Lv.5 provider).
+      var shared = parseFloat(xpSharedTimeGod.value) * 0.2;
+      var lone = xpLoneSurvivor.checked && friends === 0 ? 25 : 0;
+      // Death Coins (+300% → ×2.036) and relics measured on Boss Rewards; the EXP Potion's place is still a guess.
+      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + lone + relic + deathCoin + (xpPotion.checked ? 100 : 0);
       // VIP was on in every test, so the fitted constants are without it; it must sit outside the additive group,
-      // since relics measured ×1.40 (3.5/2.5) on Boss Rewards, not ×1.37 (3.7/2.7). Flood of Wisdom ×1.25 is unmeasured.
-      var separate = (xpVip.checked ? 1.2 : 1) * (xpPillar.checked ? 1.25 : 1);
+      // since relics measured ×1.40 (3.5/2.5) on Boss Rewards, not ×1.37 (3.7/2.7). Flood of Wisdom raised the
+      // value of one group unit ×1.32 (= 1.25 × Shared Wisdom 1.0575), so it multiplies on its own too.
+      var outside = (xpVip.checked ? 1.2 : 1) * (xpPillar.checked ? 1.25 : 1);
+      var separate = outside * (1 + Math.max(timeGod, shared) / 100);
       var gbLevel = intField(xpGbLevel, 0);
       var gbClaims = Math.min(intField(xpGbClaims, 0), 6);
       var realmsPerDay = Math.min(intField(xpRealms, 0), 24);
@@ -1281,19 +1289,20 @@
         xpTableBody.appendChild(tr);
       });
 
-      var pct = function (next) { return "+" + ((next / perDay - 1) * 100).toFixed(2) + "%"; };
+      var pct = function (next) { var d = (next / perDay - 1) * 100; return (d < 0 ? "" : "+") + d.toFixed(2) + "%"; };
       xpNote.textContent = perDay > 0
         ? "Worth to you per day: +1 Rebirth " + pct(dailyXp(xpMultiplier(rebirths + 1, ascension, guild, group, separate), gbLevel)) +
           ", +1 Ascension " + pct(dailyXp(xpMultiplier(rebirths, ascension + 1, guild, group, separate), gbLevel)) +
-          ", +10% relic Exp or one more friend " + pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + 10, separate), gbLevel)) +
+          ", +10% relic Exp " + pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + 10, separate), gbLevel)) +
+          (friends < 10 ? ", one more friend " + pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + 10 - lone, separate), gbLevel)) : "") +
           ", +1 GB Level " + pct(dailyXp(mult, gbLevel + 1)) +
           (timeGod < 100 ? ", " + (timeGod ? "+1 God of Time level " : "awakening God of Time ") +
-            pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group + (timeGod ? 4.75 : 5), separate), gbLevel)) : "") + "."
+            pct(dailyXp(xpMultiplier(rebirths, ascension, guild, group, outside * (1 + Math.max(timeGod ? timeGod + 4.75 : 5, shared) / 100)), gbLevel)) : "") + "."
         : "Enter your Rebirths to see your XP income.";
     }
 
     var scheduleXpLevel = perFrame(renderXpLevel);
-    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass, xpTimeGod, xpDeathCoin, xpPotion, xpVip, xpPillar].forEach(function (el) {
+    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass, xpTimeGod, xpDeathCoin, xpPotion, xpVip, xpPillar, xpSharedTimeGod, xpLoneSurvivor].forEach(function (el) {
       el.addEventListener("input", scheduleXpLevel);
       el.addEventListener("change", scheduleXpLevel);
     });
