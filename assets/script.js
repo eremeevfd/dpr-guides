@@ -1130,8 +1130,8 @@
 
   // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
   // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
-  // Every XP source (fitted) scales with M = Rebirths × (1 + Ascension) × (1 + guild) × (1 + gamepass + friends + patron + Lone Survivor + relic + Death Coins + potion) × (1 + God of Time) × VIP 1.2 × Flood of Wisdom 1.25.
-  // Guild Boss: 639K × (GB level + 4) × M × kill bonus, 6 claims a day. Demon Realm: 532 × M per 0.3s tick, real ticks every ~0.321s.
+  // Every XP source (fitted) scales with M = Rebirths × Ascension × (1 + guild + Alliance Experience Boost) × (1 + gamepass + friends + patron + Lone Survivor + relic + Death Coins + potion) × (1 + God of Time) × VIP 1.2 × Flood of Wisdom 1.25.
+  // Guild Boss: 505.4K × (GB level + 4) × M × kill bonus × (1 + Alliance Boss Reward Bonus), 6 claims a day. Demon Realm: 503 × M per 0.3s tick, real ticks every ~0.321s.
   var xpLevel = document.getElementById("xpLevel");
   var xpCurrent = document.getElementById("xpCurrent");
   var xpTarget = document.getElementById("xpTarget");
@@ -1153,6 +1153,8 @@
   var xpPillar = document.getElementById("xpPillar");
   var xpSharedTimeGod = document.getElementById("xpSharedTimeGod");
   var xpLoneSurvivor = document.getElementById("xpLoneSurvivor");
+  var xpAllianceExp = document.getElementById("xpAllianceExp");
+  var xpAllianceBoss = document.getElementById("xpAllianceBoss");
   var xpPerGb = document.getElementById("xpPerGb");
   var xpPerRealm = document.getElementById("xpPerRealm");
   var xpPerDay = document.getElementById("xpPerDay");
@@ -1162,10 +1164,12 @@
 
   if (xpLevel) {
     var XP_COEF = 1.35;
-    // Fitted on empty servers (no friends, patron or Shared Wisdom): main GB 639K, Lv.84k alt GB 638K / DR 532.
-    var DR_TICK_COEF = 532;
+    // Fitted on empty servers (no friends, patron or Shared Wisdom) with the Alliance perks divided out
+    // (Experience Boost +10% then, Boss Reward Bonus +15%): main GB 523K, Lv.84k alt GB 525K / DR 503.
+    // ×Ascension with the alliance in the guild term fits the pair within 0.3%; (1 + Ascension) within 0.6%.
+    var DR_TICK_COEF = 503;
     var DR_TICK_REAL_SECONDS = 0.321;
-    var GB_COEF = 639e3;
+    var GB_COEF = 524e3;
     var GB_KILL_BONUS = [1, 1.1, 1.2, 1.3, 1.5, 2];
     var XP_SUFFIXES = { k: 1e3, m: 1e6, b: 1e9, t: 1e12, q: 1e15, qa: 1e15, qd: 1e15, qi: 1e18, qn: 1e18, sx: 1e21 };
     var XP_DAYS = [["1 day", 1], ["1 week", 7], ["30 days", 30], ["90 days", 90], ["1 year", 365]];
@@ -1217,7 +1221,7 @@
 
     // `separate` = product of the buffs that multiply on their own (God of Time, VIP, Flood of Wisdom)
     function xpMultiplier(rebirths, ascension, guildPct, groupPct, separate) {
-      return rebirths * (1 + ascension) * (1 + guildPct / 100) * (1 + groupPct / 100) * separate;
+      return rebirths * Math.max(ascension, 1) * (1 + guildPct / 100) * (1 + groupPct / 100) * separate;
     }
 
     function gbKillBonusTotal(claims) {
@@ -1233,7 +1237,7 @@
 
       var rebirths = intField(xpRebirths, 0);
       var ascension = intField(xpAscension, 0);
-      var guild = Math.max(parseFloat(xpGuild.value) || 0, 0);
+      var guild = Math.max(parseFloat(xpGuild.value) || 0, 0) + parseFloat(xpAllianceExp.value);
       var relic = Math.max(parseFloat(xpRelic.value) || 0, 0);
       var friends = Math.min(intField(xpFriends, 0), 10);
       var gamepass = xpGamepass.checked ? 100 : 0;
@@ -1254,17 +1258,18 @@
       var gbClaims = Math.min(intField(xpGbClaims, 0), 6);
       var realmsPerDay = Math.min(intField(xpRealms, 0), 24);
       var minutes = Math.min(Math.max(parseFloat(xpMinutes.value) || 0, 0), 15);
+      var gbCoef = GB_COEF * (1 + parseFloat(xpAllianceBoss.value) / 100);
 
       // daily XP for a given multiplier and GB level
       function dailyXp(mult, gbLvl) {
         var perRealm = DR_TICK_COEF * mult / DR_TICK_REAL_SECONDS * minutes * 60;
-        return GB_COEF * (gbLvl + 4) * mult * gbKillBonusTotal(gbClaims) + perRealm * realmsPerDay;
+        return gbCoef * (gbLvl + 4) * mult * gbKillBonusTotal(gbClaims) + perRealm * realmsPerDay;
       }
 
       var mult = xpMultiplier(rebirths, ascension, guild, group, separate);
       var tick = DR_TICK_COEF * mult;
       var perRealm = tick / DR_TICK_REAL_SECONDS * minutes * 60;
-      var gbFirst = GB_COEF * (gbLevel + 4) * mult;
+      var gbFirst = gbCoef * (gbLevel + 4) * mult;
       var gbDay = gbFirst * gbKillBonusTotal(gbClaims);
       var perDay = dailyXp(mult, gbLevel);
       var levelsOf = function (xp) { return parseFloat((xp / xpForNext(level)).toPrecision(3)) + " levels"; };
@@ -1303,7 +1308,7 @@
     }
 
     var scheduleXpLevel = perFrame(renderXpLevel);
-    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass, xpTimeGod, xpDeathCoin, xpPotion, xpVip, xpPillar, xpSharedTimeGod, xpLoneSurvivor].forEach(function (el) {
+    [xpLevel, xpCurrent, xpTarget, xpRebirths, xpAscension, xpGuild, xpRelic, xpFriends, xpPatron, xpGbLevel, xpGbClaims, xpRealms, xpMinutes, xpGamepass, xpTimeGod, xpDeathCoin, xpPotion, xpVip, xpPillar, xpSharedTimeGod, xpLoneSurvivor, xpAllianceExp, xpAllianceBoss].forEach(function (el) {
       el.addEventListener("input", scheduleXpLevel);
       el.addEventListener("change", scheduleXpLevel);
     });
