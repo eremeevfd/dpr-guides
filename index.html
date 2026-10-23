@@ -1026,10 +1026,6 @@
               <option value="100">Lv.20 (+20%)</option>
             </select>
           </div>
-          <div class="tool-field tool-field-auto">
-            <span class="tool-field-label">&nbsp;</span>
-            <label class="tool-check-row"><input type="checkbox" id="xpLoneSurvivor"> Lone Survivor title (+25% with no friends in server)</label>
-          </div>
         </div>
         <div class="tool-row">
           <div class="tool-field tool-field-auto">
@@ -1088,6 +1084,10 @@
           <span class="tool-result-value" id="xpPerGb"></span>
         </div>
         <div class="tool-result">
+          <span class="tool-result-label">GB rewards (claims 1&ndash;6):</span>
+          <span class="tool-result-value" id="xpGbRewards"></span>
+        </div>
+        <div class="tool-result">
           <span class="tool-result-label">Demon Realm:</span>
           <span class="tool-result-value" id="xpPerRealm"></span>
         </div>
@@ -1109,14 +1109,14 @@
         <div class="tool-group">
           <p class="tool-group-label">XP formulas</p>
           <p class="tool-note">Every XP source we've measured uses the same multiplier:</p>
-          <p class="tool-formula"><strong>M = Rebirths &times; Ascension &times; (1 + Guild % + Alliance Experience Boost) &times; (1 + Double XP + Friends + Patron + Lone Survivor + Relic Exp % + Death Coins + EXP Potion) &times; (1 + God of Time) &times; VIP 1.2 &times; Flood of Wisdom 1.25</strong></p>
-          <p class="tool-note">Each Rebirth multiplies your XP by your Rebirth count, so Rebirth 391 earns 391/390 of Rebirth 390. Ascension multiplies by its number, as the Ascension screen shows (EXP &times;71 at Ascension 71). The Alliance Experience Boost (+5% per level, +15% at Lv.3) adds to your guild&rsquo;s XP %. The last group adds up: Double XP Boost is +100%, each friend in the server +10%, the Patron title +5% to +25%, the Lone Survivor title +25% while no friends are in the server, relics their Exp %, Death Coins their EXP % (a full set of five 60% coins is +300%) and an EXP Potion +100%. Because they add up, a +100% relic on top of Double XP and a few friends raises XP by about 40%, not &times;2. The God of Time class multiplies on its own (the game calls it &ldquo;independent&rdquo; EXP): 5% at Lv.0 plus 4.75% per level, 100% at Lv.20. From Lv.4 its Shared Wisdom gives everyone else in the server 20% of that bonus; only the best one counts, and your own God of Time replaces it when it&rsquo;s higher. VIP&rsquo;s +20% and the Flood of Wisdom pillar&rsquo;s &times;1.25 also multiply on their own.</p>
-          <p class="tool-formula"><strong>Guild Boss: EXP &asymp; 524K &times; (GB Level + 4) &times; M &times; kill bonus &times; (1 + Alliance Boss Reward Bonus)</strong></p>
+          <p class="tool-formula"><strong>M = Rebirths &times; Ascension &times; (1 + Guild %) &times; (1 + Double XP + Friends + Patron + Alliance Experience Boost + Relic Exp % + Death Coins + EXP Potion) &times; (1 + God of Time) &times; VIP 1.2 &times; Flood of Wisdom 1.25</strong></p>
+          <p class="tool-note">Each Rebirth multiplies your XP by your Rebirth count, so Rebirth 391 earns 391/390 of Rebirth 390. Ascension multiplies by its number, as the Ascension screen shows (EXP &times;71 at Ascension 71). The last group adds up: Double XP Boost is +100%, each friend in the server +10%, the Patron title +5% to +25%, the Alliance Experience Boost +5% per level (+15% at Lv.3), relics their Exp %, Death Coins their EXP % (a full set of five 60% coins is +300%) and an EXP Potion +100%. Because they add up, a +100% relic on top of Double XP and a few friends raises XP by about 40%, not &times;2. The Lone Survivor title gives no XP that we can measure: two friends joining an empty server added exactly their +20%. The God of Time class multiplies on its own (the game calls it &ldquo;independent&rdquo; EXP): 5% at Lv.0 plus 4.75% per level, 100% at Lv.20. From Lv.4 its Shared Wisdom gives everyone else in the server 20% of that bonus; only the best one counts, and your own God of Time replaces it when it&rsquo;s higher. VIP&rsquo;s +20% and the Flood of Wisdom pillar&rsquo;s &times;1.25 also multiply on their own.</p>
+          <p class="tool-formula"><strong>Guild Boss: EXP &asymp; 597K &times; (GB Level + 4) &times; M &times; kill bonus &times; (1 + Alliance Boss Reward Bonus)</strong></p>
           <p class="tool-note">You can claim 6 GB rewards per day. The kill bonus grows with each one: &times;1.0, 1.1, 1.2, 1.3, 1.5 and &times;2.0 for the 6th, so all six together are worth 8.1 first kills. The GB's coin reward (the +1,655 next to the level) follows 23 &times; (GB Level + 4).</p>
-          <p class="tool-formula"><strong>Demon Realm: XP per 0.3s &asymp; 503 &times; M</strong></p>
+          <p class="tool-formula"><strong>Demon Realm: XP per 0.3s &asymp; 573 &times; M</strong></p>
           <p class="tool-note">Once the Demon Realm boss dies, everyone in the server gets this every 0.3s until the realm closes at :50. Ticks actually land about every 0.32s, so real income is about 93% of the number the realm shows.</p>
         </div>
-        <p class="tool-note">These formulas are fitted from our own in-game readings, not taken from the game code. Level XP matches six readings from Lv.84,729 to Lv.276,185. The constants come from empty servers, where no friends, Patron or Shared Wisdom can interfere: two characters (Ascension 44 and 71, Rebirth 235 and 390) agree within 0.3%. All our test characters are in one alliance (Experience Boost Lv.2 at the time, Boss Reward Bonus Lv.3), so the perks are divided out of the constants by their listed %, and where Experience Boost sits is inferred: added to guild % with &times;Ascension fits the two characters best; (1 + Ascension) is 0.6% worse. On a busy server expect a few percent more than shown if someone there has God of Time Lv.4+ and you don&rsquo;t set it. Relic, Friend and Rebirth changes match within 0.3%. Whether the guild % multiplies separately is the least certain part. The GB Level term matches GB Lv.68&ndash;78. Death Coins, relics, the Patron title, God of Time (with Shared Wisdom) and Flood of Wisdom were each switched on and off against the Boss Rewards list to find where they sit. The EXP Potion hasn't had a clean test yet, so its place in the additive group is still a guess. VIP was on in every test. Hellroad isn't counted. XP fields take game-style numbers like <code>8.31B</code>, <code>1.5T</code> or <code>3e15</code>.</p>
+        <p class="tool-note">These formulas are fitted from our own in-game readings, not taken from the game code. Level XP matches six readings from Lv.84,729 to Lv.276,185. The GB constant is fitted to three characters (Ascension 44, 59 and 71, Rebirth 236, 324 and 390) and matches each within 1.7%; the Ascension 44 one reads about 2% more than shown, so the formula may underestimate low Ascensions. All our test characters are in one alliance (Experience Boost and Boss Reward Bonus Lv.3), so the perks are divided out of the constants by their listed %; switching relics on and off shows Experience Boost adds to the same group as Double XP. The Demon Realm constant comes from one empty-server reading, scaled to match. On a busy server expect a few percent more than shown if someone there has God of Time Lv.4+ and you don&rsquo;t set it. Relic, Friend and Rebirth changes match within 0.3%. Whether the guild % multiplies separately is the least certain part. The GB Level term matches GB Lv.68&ndash;78. Death Coins, relics, the Patron title, God of Time (with Shared Wisdom) and Flood of Wisdom were each switched on and off against the Boss Rewards list to find where they sit. The EXP Potion hasn't had a clean test yet, so its place in the additive group is still a guess. VIP was on in every test. Hellroad isn't counted. XP fields take game-style numbers like <code>8.31B</code>, <code>1.5T</code> or <code>3e15</code>.</p>
       </div>
     </section>
 
