@@ -1167,6 +1167,7 @@
     // GB fitted on 2026-10-23 Boss Rewards with the Alliance perks divided out (Experience Boost +15%,
     // Boss Reward Bonus +15%): main 591K, Lv.201k alt 594K, Lv.98k alt 607K → geometric mean 597K, all within 1.7%.
     // The Lv.98k alt's 2026-10-21 empty-server pair (GB 608K, DR 583) puts DR at 583 × 597 / 608 = 573.
+    // Confirmed 2026-10-23: main's 82.72M tick vs its 8.23T GB 1st kill under the same buffs → 572.7.
     // Experience Boost sits in the additive group: main relics +100% off→on read ×1.464 (3.15 / 2.15).
     var DR_TICK_COEF = 573;
     var DR_TICK_REAL_SECONDS = 0.321;
