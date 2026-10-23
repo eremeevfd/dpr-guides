@@ -1130,7 +1130,7 @@
 
   // Level XP: XP for the next level = 1.35 × Level², fitted from in-game readings Lv.84,729–276,185.
   // Total XP from Lv.1 to Lv.n = 1.35 × Σ l² (l = 1..n-1) = 1.35 × (n-1)n(2n-1)/6.
-  // Every XP source (fitted) scales with M = Rebirths × Ascension × (1 + guild) × (1 + gamepass + friends + patron + Alliance Experience Boost + relic + Death Coins + potion) × (1 + God of Time) × VIP 1.2 × Flood of Wisdom 1.25.
+  // Every XP source (fitted) scales with M = Rebirths × Ascension × (1 + guild) × (1 + gamepass + friends + patron + Alliance Experience Boost + relic + Death Coins) × (1 + God of Time) × VIP 1.2 × Flood of Wisdom 1.25 × EXP Potion 1.572.
   // Guild Boss: 597K × (GB level + 4) × M × kill bonus × (1 + Alliance Boss Reward Bonus), 6 claims a day. Demon Realm: 573 × M per 0.3s tick, real ticks every ~0.321s.
   var xpLevel = document.getElementById("xpLevel");
   var xpCurrent = document.getElementById("xpCurrent");
@@ -1248,13 +1248,15 @@
       // (own Lv.12 measured ×1.533 = 1.62 / 1.0575 on a server with a Lv.5 provider).
       var shared = parseFloat(xpSharedTimeGod.value) * 0.2;
       // Death Coins (+300% → ×2.036), relics, friends and the Alliance Experience Boost measured on Boss Rewards;
-      // the EXP Potion's place is still a guess. Lone Survivor is left out: 2 friends joining the main's empty
+      // Lone Survivor is left out: 2 friends joining the main's empty
       // server read ×1.064 (3.35 / 3.15), so it gave no XP while alone.
-      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + parseFloat(xpAllianceExp.value) + relic + deathCoin + (xpPotion.checked ? 100 : 0);
+      var group = gamepass + friends * 10 + parseFloat(xpPatron.value) + parseFloat(xpAllianceExp.value) + relic + deathCoin;
       // VIP was on in every test, so the fitted constants are without it; it must sit outside the additive group,
       // since relics measured ×1.40 (3.5/2.5) on Boss Rewards, not ×1.37 (3.7/2.7). Flood of Wisdom raised the
       // value of one group unit ×1.32 (= 1.25 × Shared Wisdom 1.0575), so it multiplies on its own too.
-      var outside = (xpVip.checked ? 1.2 : 1) * (xpPillar.checked ? 1.25 : 1);
+      // EXP Potion: main's Boss Rewards read ×1.571 with relics off and ×1.572 with relics +100% on, so it multiplies
+      // on its own despite its "+100%" description.
+      var outside = (xpVip.checked ? 1.2 : 1) * (xpPillar.checked ? 1.25 : 1) * (xpPotion.checked ? 1.572 : 1);
       var separate = outside * (1 + Math.max(timeGod, shared) / 100);
       var gbLevel = intField(xpGbLevel, 0);
       var gbClaims = Math.min(intField(xpGbClaims, 0), 6);
