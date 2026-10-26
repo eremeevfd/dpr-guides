@@ -59,6 +59,7 @@
     <a href="#gold-stone-calc">Gold Weapon Stone: SoD or TF?</a>
     <a href="#soul-spawner-calc">Soul Spawner</a>
     <a href="#xp-level-calc">Level XP</a>
+    <a href="#probability-calc">Probability</a>
     <p class="sidebar-note">Click any image to zoom.<br>Guide screenshots by <a href="https://www.roblox.com/users/23063227/profile" target="_blank" rel="noopener"><strong>iPuffyy</strong></a> (Roblox).</p>
   </nav>
 
@@ -1119,6 +1120,55 @@
           <p class="tool-note">Once the Demon Realm boss dies, everyone in the server gets this every 0.3s until the realm closes at :50. Ticks actually land about every 0.32s, so real income is about 93% of the number the realm shows.</p>
         </div>
         <p class="tool-note">These formulas are fitted from our own in-game readings, not taken from the game code. Level XP matches six readings from Lv.84,729 to Lv.276,185. The GB constant is fitted to three characters (Ascension 44, 59 and 71, Rebirth 236, 324 and 390) and matches each within 1.7%; the Ascension 44 one reads about 2% more than shown, so the formula may underestimate low Ascensions. All our test characters are in one alliance (Experience Boost and Boss Reward Bonus Lv.3), so the perks are divided out of the constants by their listed %; switching relics on and off shows Experience Boost adds to the same group as Double XP. The Demon Realm constant checks out against the GB rewards: with the same buffs, an 8.23T first kill predicts an 82.76M tick, and the realm showed 82.72M. On a busy server expect a few percent more than shown if someone there has God of Time Lv.4+ and you don&rsquo;t set it. Relic, Friend and Rebirth changes match within 0.3%. Whether the guild % multiplies separately is the least certain part. The GB Level term matches GB Lv.68&ndash;78. Death Coins, relics, the Patron title, God of Time (with Shared Wisdom), Flood of Wisdom and the EXP Potion were each switched on and off against the Boss Rewards list to find where they sit. VIP was on in every test. Hellroad isn't counted. XP fields take game-style numbers like <code>8.31B</code>, <code>1.5T</code> or <code>3e15</code>.</p>
+      </div>
+
+      <div class="tool" id="probability-calc">
+        <h3>Probability</h3>
+        <p>Chance to hit a drop or roll at least once in a number of tries, when every try has the same Success Chance.</p>
+        <div class="tool-row">
+          <div class="tool-field tool-field-small">
+            <label for="probChance" class="tool-field-label">Success Chance %</label>
+            <input type="number" id="probChance" class="tool-input" min="0" max="100" step="any" value="1">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="probAttempts" class="tool-field-label">Number of Attempts</label>
+            <input type="number" id="probAttempts" class="tool-input" min="0" value="100">
+          </div>
+          <div class="tool-field tool-field-small">
+            <label for="probTarget" class="tool-field-label">Target Probability %</label>
+            <input type="number" id="probTarget" class="tool-input" min="0" max="100" step="any" value="90">
+          </div>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">At least one success:</span>
+          <span class="tool-result-value" id="probAtLeastOne"></span>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">All fail:</span>
+          <span class="tool-result-value" id="probAllFail"></span>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">Expected successes:</span>
+          <span class="tool-result-value" id="probExpected"></span>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label">Average attempts per success:</span>
+          <span class="tool-result-value" id="probAverage"></span>
+        </div>
+        <div class="tool-result">
+          <span class="tool-result-label" id="probTargetLabel">Attempts for target:</span>
+          <span class="tool-result-value" id="probForTarget"></span>
+        </div>
+        <div class="tool-group">
+          <p class="tool-group-label">Formulas</p>
+          <p class="tool-note">p = Success Chance / 100, n = Number of Attempts.</p>
+          <p class="tool-formula"><strong>All fail = (1 &minus; p)<sup>n</sup></strong></p>
+          <p class="tool-formula"><strong>At least one success = 1 &minus; (1 &minus; p)<sup>n</sup></strong></p>
+          <p class="tool-formula"><strong>Expected successes = n &times; p</strong></p>
+          <p class="tool-formula"><strong>Average attempts per success = 1 / p</strong></p>
+          <p class="tool-formula"><strong>Attempts for target = ceil(log(1 &minus; target) / log(1 &minus; p))</strong></p>
+          <p class="tool-note">Every attempt is treated as independent: past failures don't raise the next chance.</p>
+        </div>
       </div>
     </section>
 

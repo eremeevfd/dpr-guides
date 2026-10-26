@@ -1320,4 +1320,67 @@
     });
     renderXpLevel();
   }
+
+  // Probability: independent attempts with the same success chance p
+  var probChance = document.getElementById("probChance");
+  var probAttempts = document.getElementById("probAttempts");
+  var probTarget = document.getElementById("probTarget");
+
+  if (probChance) {
+    var probAtLeastOne = document.getElementById("probAtLeastOne");
+    var probAllFail = document.getElementById("probAllFail");
+    var probExpected = document.getElementById("probExpected");
+    var probAverage = document.getElementById("probAverage");
+    var probTargetLabel = document.getElementById("probTargetLabel");
+    var probForTarget = document.getElementById("probForTarget");
+
+    function percentField(el) {
+      return Math.min(Math.max(parseFloat(el.value) || 0, 0), 100) / 100;
+    }
+
+    // never show a 0% or 100% that isn't exact
+    function formatChance(x) {
+      if (x <= 0) return "0%";
+      if (x >= 1) return "100%";
+      if (x < 0.0001) return "< 0.01%";
+      if (x > 0.9999) return "> 99.99%";
+      return parseFloat((x * 100).toFixed(2)) + "%";
+    }
+
+    function formatCount(x) {
+      return parseFloat(x.toFixed(3)).toLocaleString();
+    }
+
+    function chanceIn(p, n) {
+      return 1 - Math.pow(1 - p, n);
+    }
+
+    function renderProbability() {
+      var p = percentField(probChance);
+      var n = Math.max(Math.floor(parseFloat(probAttempts.value) || 0), 0);
+      var target = percentField(probTarget);
+
+      probAtLeastOne.textContent = formatChance(chanceIn(p, n));
+      probAllFail.textContent = formatChance(Math.pow(1 - p, n));
+      probExpected.textContent = formatCount(n * p);
+      probAverage.textContent = p > 0 ? formatCount(1 / p) : "never";
+      probTargetLabel.textContent = "Attempts for " + formatChance(target) + ":";
+
+      var needed;
+      if (target <= 0) needed = 0;
+      else if (p >= 1) needed = 1;
+      else if (p <= 0 || target >= 1) needed = Infinity;
+      // log1p keeps tiny chances exact; the epsilon stops float noise from adding a whole attempt (0.5 → 75% is 2, not 3)
+      else needed = Math.max(Math.ceil(Math.log1p(-target) / Math.log1p(-p) - 1e-9), 1);
+      probForTarget.textContent = isFinite(needed)
+        ? needed.toLocaleString() + (needed > 0 ? " (" + formatChance(chanceIn(p, needed)) + " chance)" : "")
+        : "never";
+    }
+
+    var scheduleProbability = perFrame(renderProbability);
+    [probChance, probAttempts, probTarget].forEach(function (el) {
+      el.addEventListener("input", scheduleProbability);
+    });
+    renderProbability();
+  }
 })();
