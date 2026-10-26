@@ -1324,15 +1324,14 @@
   // Probability: independent attempts with the same success chance p
   var probChance = document.getElementById("probChance");
   var probAttempts = document.getElementById("probAttempts");
-  var probTarget = document.getElementById("probTarget");
 
   if (probChance) {
     var probAtLeastOne = document.getElementById("probAtLeastOne");
     var probAllFail = document.getElementById("probAllFail");
     var probExpected = document.getElementById("probExpected");
     var probAverage = document.getElementById("probAverage");
-    var probTargetLabel = document.getElementById("probTargetLabel");
-    var probForTarget = document.getElementById("probForTarget");
+    var probTableBody = document.querySelector("#probTable tbody");
+    var PROB_TARGETS = [0.5, 0.9, 0.95, 0.99, 0.999];
 
     function percentField(el) {
       return Math.min(Math.max(parseFloat(el.value) || 0, 0), 100) / 100;
@@ -1358,27 +1357,28 @@
     function renderProbability() {
       var p = percentField(probChance);
       var n = Math.max(Math.floor(parseFloat(probAttempts.value) || 0), 0);
-      var target = percentField(probTarget);
 
       probAtLeastOne.textContent = formatChance(chanceIn(p, n));
       probAllFail.textContent = formatChance(Math.pow(1 - p, n));
       probExpected.textContent = formatCount(n * p);
       probAverage.textContent = p > 0 ? formatCount(1 / p) : "never";
-      probTargetLabel.textContent = "Attempts for " + formatChance(target) + ":";
 
-      var needed;
-      if (target <= 0) needed = 0;
-      else if (p >= 1) needed = 1;
-      else if (p <= 0 || target >= 1) needed = Infinity;
-      // log1p keeps tiny chances exact; the epsilon stops float noise from adding a whole attempt (0.5 → 75% is 2, not 3)
-      else needed = Math.max(Math.ceil(Math.log1p(-target) / Math.log1p(-p) - 1e-9), 1);
-      probForTarget.textContent = isFinite(needed)
-        ? needed.toLocaleString() + (needed > 0 ? " (" + formatChance(chanceIn(p, needed)) + " chance)" : "")
-        : "never";
+      probTableBody.innerHTML = "";
+      PROB_TARGETS.forEach(function (target) {
+        var needed;
+        if (p >= 1) needed = 1;
+        else if (p <= 0) needed = Infinity;
+        // log1p keeps tiny chances exact; the epsilon stops float noise from adding a whole attempt (0.5 → 75% is 2, not 3)
+        else needed = Math.max(Math.ceil(Math.log1p(-target) / Math.log1p(-p) - 1e-9), 1);
+        var tr = document.createElement("tr");
+        tr.innerHTML = "<td>" + formatChance(target) + "</td><td>" +
+          (isFinite(needed) ? needed.toLocaleString() + " (" + formatChance(chanceIn(p, needed)) + " chance)" : "never") + "</td>";
+        probTableBody.appendChild(tr);
+      });
     }
 
     var scheduleProbability = perFrame(renderProbability);
-    [probChance, probAttempts, probTarget].forEach(function (el) {
+    [probChance, probAttempts].forEach(function (el) {
       el.addEventListener("input", scheduleProbability);
     });
     renderProbability();

@@ -1134,10 +1134,6 @@
             <label for="probAttempts" class="tool-field-label">Number of Attempts</label>
             <input type="number" id="probAttempts" class="tool-input" min="0" value="100">
           </div>
-          <div class="tool-field tool-field-small">
-            <label for="probTarget" class="tool-field-label">Target Probability %</label>
-            <input type="number" id="probTarget" class="tool-input" min="0" max="100" step="any" value="90">
-          </div>
         </div>
         <div class="tool-result">
           <span class="tool-result-label">At least one success:</span>
@@ -1155,9 +1151,11 @@
           <span class="tool-result-label">Average attempts per success:</span>
           <span class="tool-result-value" id="probAverage"></span>
         </div>
-        <div class="tool-result">
-          <span class="tool-result-label" id="probTargetLabel">Attempts for target:</span>
-          <span class="tool-result-value" id="probForTarget"></span>
+        <div class="table-scroll">
+          <table class="tool-table" id="probTable">
+            <thead><tr><th>Target</th><th>Attempts Needed</th></tr></thead>
+            <tbody></tbody>
+          </table>
         </div>
         <div class="tool-group">
           <p class="tool-group-label">Formulas</p>
@@ -1167,7 +1165,7 @@
           <p class="tool-formula"><strong>Expected successes = n &times; p</strong></p>
           <p class="tool-formula"><strong>Average attempts per success = 1 / p</strong></p>
           <p class="tool-formula"><strong>Attempts for target = ceil(log(1 &minus; target) / log(1 &minus; p))</strong></p>
-          <p class="tool-note">Every attempt is treated as independent: past failures don't raise the next chance.</p>
+          <p class="tool-note">Every attempt is treated as independent: past failures don't raise the next chance. That's also why there's no 100% row: the chance that every attempt fails shrinks but never reaches zero, unless the Success Chance itself is 100%.</p>
         </div>
       </div>
     </section>
