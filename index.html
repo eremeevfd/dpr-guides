@@ -49,6 +49,7 @@
     <a href="#nightmare-labyrinth">Nightmare Labyrinth</a>
     <a href="#soul-awakening">Soul Awakening</a>
     <a href="#soul-spawner">Soul Spawner</a>
+    <a href="#halloween-lottery">Halloween Lottery</a>
     <p class="sidebar-label">Tools</p>
     <a href="#roblox-username-lookup">Roblox Username Lookup</a>
     <a href="#relic-odds-calc">Relic Drop Odds</a>
@@ -612,6 +613,21 @@
         <li>H = 2 + 0.05 &times; Midnight Harvester Level with it.</li>
       </ul>
       <p class="tool-note">This formula is fitted from player readings, not taken from the game code. It matches nine in-game readings from Ascension 24 to 81 to within 0.01%. Try your numbers in the <a href="#soul-spawner-calc">Soul Spawner calculator</a>.</p>
+    </section>
+
+    <section id="halloween-lottery" class="card">
+      <h2>Halloween Lottery <span class="tag">NEW</span></h2>
+      <p>Winning numbers so far, oldest first. New numbers are added every day.</p>
+      <p class="lottery-summary" id="lotterySummary">Loading&hellip;</p>
+      <ol class="lottery-draws" id="lotteryDraws"></ol>
+      <h3>How Often Each Number Won</h3>
+      <div class="table-scroll">
+        <table class="tool-table" id="lotteryTable">
+          <thead><tr><th>Number</th><th>Wins</th><th>Share</th><th>Last Won</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="tool-note">Last Won counts draws back: 1 is the latest draw. A number that has won more so far isn't more likely to win next: each draw is a fresh pick.</p>
     </section>
 
     <section id="tools" class="card">
