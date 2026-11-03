@@ -1383,4 +1383,64 @@
     });
     renderProbability();
   }
+
+  // Halloween lottery log: numbers live in assets/halloween-lottery.txt, one per line
+  var lotterySummary = document.getElementById("lotterySummary");
+  if (lotterySummary) {
+    var lotteryDraws = document.getElementById("lotteryDraws");
+    var lotteryTableBody = document.querySelector("#lotteryTable tbody");
+
+    fetch("assets/halloween-lottery.txt", { cache: "no-cache" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.text();
+      })
+      .then(function (text) {
+        // Ignore comments and anything that isn't a whole number (e.g. a pasted "halloween lottery" title)
+        var draws = text.split("\n")
+          .map(function (line) { return line.trim(); })
+          .filter(function (line) { return /^\d+$/.test(line); })
+          .map(Number);
+        renderLottery(draws);
+      })
+      .catch(function () {
+        lotterySummary.textContent = "Couldn't load the lottery numbers. Try reloading the page.";
+      });
+  }
+
+  function renderLottery(draws) {
+    if (!draws.length) {
+      lotterySummary.textContent = "No numbers logged yet.";
+      return;
+    }
+    var total = draws.length;
+    lotterySummary.innerHTML = "<strong>" + total + "</strong> draws logged. Latest: <strong>" + draws[total - 1] + "</strong>";
+
+    lotteryDraws.innerHTML = "";
+    draws.forEach(function (n, i) {
+      var li = document.createElement("li");
+      li.textContent = n;
+      li.title = "Draw " + (i + 1);
+      if (i === total - 1) li.className = "lottery-latest";
+      lotteryDraws.appendChild(li);
+    });
+
+    // Every number from 1 up to the highest seen, so numbers that never won still show
+    var max = Math.max.apply(null, draws);
+    var wins = [], lastIndex = [];
+    draws.forEach(function (n, i) {
+      wins[n] = (wins[n] || 0) + 1;
+      lastIndex[n] = i;
+    });
+
+    lotteryTableBody.innerHTML = "";
+    for (var n = 1; n <= max; n++) {
+      var count = wins[n] || 0;
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td>" + n + "</td><td>" + count + "</td><td>" +
+        (count / total * 100).toFixed(1) + "%</td>" +
+        (count ? "<td>" + (total - lastIndex[n]) + "</td>" : '<td class="lottery-never">never</td>');
+      lotteryTableBody.appendChild(tr);
+    }
+  }
 })();
